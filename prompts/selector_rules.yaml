@@ -1,0 +1,8 @@
+﻿hard_thresholds:
+  label_score: 0.8
+  semantic_score: 0.8
+  final_score: 0.82
+dynamic:
+  enabled: true
+  percentile_keep: 0.3
+  length_bins: [0, 20, 50, 200, 1000]

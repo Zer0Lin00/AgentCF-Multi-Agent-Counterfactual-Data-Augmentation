@@ -1,0 +1,6 @@
+﻿extends: default.yaml
+augmentation:
+  method: agentcf
+  num_candidates: 3
+  keep_top_k: 1
+  max_retry_rounds: 2

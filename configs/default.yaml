@@ -1,0 +1,50 @@
+﻿dataset: sst2
+id_dataset: sst2
+ood_dataset: imdb
+model_name: distilbert-base-uncased
+max_length: 128
+batch_size: 16
+learning_rate: 2e-5
+epochs: 2
+seed: 42
+train_samples: 1000
+eval_samples: 500
+output_root: outputs
+
+augmentation:
+  method: agentcf
+  ratio: 1.0
+  standard_method: synonym
+  num_candidates: 3
+  keep_top_k: 1
+  max_retry_rounds: 2
+
+thresholds:
+  label_score: 0.80
+  semantic_score: 0.80
+  minimality_score: 0.70
+  final_score: 0.82
+  filtering_mode: dynamic_percentile
+  percentile_keep: 0.30
+
+weights:
+  label_score: 0.35
+  semantic_score: 0.30
+  minimality_score: 0.20
+  consistency_score: 0.15
+
+runtime:
+  async_enabled: true
+  rate_limit_qps: 5
+  retry_backoff: exponential
+  max_retries: 3
+  checkpoint_every_n_samples: 50
+
+llm:
+  enabled: true
+  base_url_env: OPENAI_BASE_URL
+  api_key_env: OPENAI_API_KEY
+  planner_model_env: PLANNER_MODEL
+  generator_model_env: GENERATOR_MODEL
+  verifier_model_env: VERIFIER_MODEL
+

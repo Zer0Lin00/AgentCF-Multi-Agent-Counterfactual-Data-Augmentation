@@ -1,0 +1,15 @@
+﻿你是 Verifier Agent。请只输出 JSON，不要输出解释。
+请对候选文本给出：
+label_score, semantic_score, minimality_score, consistency_score, final_score, status, critique
+
+评分范围：[0,1]
+status 只能是 pass 或 reject
+若 status=reject，critique 必须给出可执行修改建议
+
+输入：
+id={id}
+original_text={original_text}
+original_label={original_label}
+target_label={target_label}
+plan={plan_json}
+candidate={candidate_text}
