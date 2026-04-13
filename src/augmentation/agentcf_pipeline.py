@@ -74,6 +74,9 @@ async def _process_one(
     return chosen, [plan], all_candidates, all_verifications
 
 
+CONCURRENCY = 50
+
+
 async def build_agentcf_aug(df: pd.DataFrame, config: dict[str, Any]) -> tuple[pd.DataFrame, dict[str, int]]:
     planner = PlannerAgent(config)
     generator = GeneratorAgent(config)
@@ -82,16 +85,21 @@ async def build_agentcf_aug(df: pd.DataFrame, config: dict[str, Any]) -> tuple[p
     max_retry_rounds = int(config["augmentation"]["max_retry_rounds"])
     checkpoint_every = int(config["runtime"]["checkpoint_every_n_samples"])
 
+    sample_records = df.to_dict(orient="records")
+    sem = asyncio.Semaphore(CONCURRENCY)
+    completed = 0
     selected_rows: list[dict] = []
     plans_buffer: list[dict] = []
     candidates_buffer: list[dict] = []
     verifications_buffer: list[dict] = []
 
-    sample_records = df.to_dict(orient="records")
-    for idx, sample in enumerate(sample_records, start=1):
-        selected, plans, cands, vers = await _process_one(
-            sample, planner, generator, verifier, selector, max_retry_rounds
-        )
+    async def bounded(sample):
+        async with sem:
+            return await _process_one(sample, planner, generator, verifier, selector, max_retry_rounds)
+
+    results = await asyncio.gather(*[bounded(s) for s in sample_records])
+
+    for idx, (selected, plans, cands, vers) in enumerate(results, start=1):
         selected_rows.extend(selected)
         plans_buffer.extend(plans)
         candidates_buffer.extend(cands)
@@ -105,8 +113,9 @@ async def build_agentcf_aug(df: pd.DataFrame, config: dict[str, Any]) -> tuple[p
             plans_buffer.clear()
             candidates_buffer.clear()
             verifications_buffer.clear()
+            print(f"[AgentCF] checkpoint: {idx}/{len(sample_records)} samples processed", flush=True)
 
-    aug_df = pd.DataFrame(selected_rows, columns=["id", "text", "label", "source", "candidate_id", "final_score"])
+    aug_df = pd.DataFrame(selected_rows, columns=["id", "text", "label", "source", "candidate_id", "final_score"]) if selected_rows else pd.DataFrame(columns=["id", "text", "label", "source", "candidate_id", "final_score"])
     stats = {
         "input_samples": len(df),
         "selected_samples": len(aug_df),

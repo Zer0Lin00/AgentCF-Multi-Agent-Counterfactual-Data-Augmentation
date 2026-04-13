@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+from pathlib import Path
 
 import pandas as pd
 
@@ -75,8 +76,15 @@ async def run_experiment(config_path: str) -> None:
                 ]
                 aug_df = aug_df[aug_df["id"].isin(ver_df["id"])]
         else:
-            aug_df, stats = await build_agentcf_aug(train_df, cfg)
-            ver_df = pd.read_json("outputs/checkpoints/verifications.jsonl", lines=True)
+            selected_path = Path("outputs/selected_counterfactuals/selected.jsonl")
+            ver_path = Path("outputs/checkpoints/verifications.jsonl")
+            if selected_path.exists() and ver_path.exists():
+                print("[AgentCF] Found existing checkpoint, skipping LLM generation.", flush=True)
+                aug_df = pd.read_json(selected_path, lines=True)
+                ver_df = pd.read_json(ver_path, lines=True)
+            else:
+                aug_df, stats = await build_agentcf_aug(train_df, cfg)
+                ver_df = pd.read_json(ver_path, lines=True)
 
         merged_train = _merge_train(train_df, aug_df, ratio=ratio)
         out_dir = f"outputs/checkpoints/{method.lower().replace(' ', '_').replace('+', 'plus').replace('-', '_')}"

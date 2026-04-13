@@ -1,4 +1,6 @@
 ﻿extends: default.yaml
+methods:
+  - "AgentCF (Ours)"
 augmentation:
   method: agentcf
   num_candidates: 3

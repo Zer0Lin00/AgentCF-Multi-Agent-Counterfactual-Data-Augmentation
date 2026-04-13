@@ -20,10 +20,10 @@ augmentation:
   max_retry_rounds: 2
 
 thresholds:
-  label_score: 0.80
-  semantic_score: 0.80
-  minimality_score: 0.70
-  final_score: 0.82
+  label_score: 0.45
+  semantic_score: 0.70
+  minimality_score: 0.55
+  final_score: 0.62
   filtering_mode: dynamic_percentile
   percentile_keep: 0.30
 
@@ -35,7 +35,7 @@ weights:
 
 runtime:
   async_enabled: true
-  rate_limit_qps: 5
+  rate_limit_qps: 50
   retry_backoff: exponential
   max_retries: 3
   checkpoint_every_n_samples: 50

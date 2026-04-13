@@ -87,7 +87,7 @@ class VerifierAgent:
         return float(min(max(raw, 0.0), 1.0))
 
     def _consistency_score(self, original: str, candidate: str, plan: dict[str, Any]) -> float:
-        preserve = [w.lower() for w in plan.get("elements_to_preserve", [])]
+        preserve = [str(w).lower() for w in plan.get("elements_to_preserve", []) if w]
         if not preserve:
             return 0.8
         o = original.lower()
