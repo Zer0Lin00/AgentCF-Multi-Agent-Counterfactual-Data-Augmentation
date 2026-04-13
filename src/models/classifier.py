@@ -32,18 +32,19 @@ class HFClassifier:
             remove_columns=["text"],
         )
 
+    @staticmethod
+    def _compute_metrics(eval_pred):
+        logits, labels = eval_pred
+        preds = np.argmax(logits, axis=-1)
+        return {
+            "accuracy": accuracy_score(labels, preds),
+            "macro_f1": f1_score(labels, preds, average="macro"),
+        }
+
     def train_and_eval(self, train_df, val_df, cfg: dict[str, Any], out_dir: str) -> dict[str, float]:
         train_ds = self._to_dataset(train_df)
         val_ds = self._to_dataset(val_df)
         collator = DataCollatorWithPadding(tokenizer=self.tokenizer)
-
-        def compute_metrics(eval_pred):
-            logits, labels = eval_pred
-            preds = np.argmax(logits, axis=-1)
-            return {
-                "accuracy": accuracy_score(labels, preds),
-                "macro_f1": f1_score(labels, preds, average="macro"),
-            }
 
         args = TrainingArguments(
             output_dir=out_dir,
@@ -66,9 +67,34 @@ class HFClassifier:
             eval_dataset=val_ds,
             processing_class=self.tokenizer,
             data_collator=collator,
-            compute_metrics=compute_metrics,
+            compute_metrics=self._compute_metrics,
         )
         trainer.train()
+        metrics = trainer.evaluate()
+        return {
+            "acc": float(metrics.get("eval_accuracy", 0.0)),
+            "f1": float(metrics.get("eval_macro_f1", 0.0)),
+        }
+
+    def evaluate_df(self, df, cfg: dict[str, Any], out_dir: str) -> dict[str, float]:
+        eval_ds = self._to_dataset(df)
+        collator = DataCollatorWithPadding(tokenizer=self.tokenizer)
+        args = TrainingArguments(
+            output_dir=out_dir,
+            per_device_eval_batch_size=int(cfg["batch_size"]),
+            report_to="none",
+            do_train=False,
+            do_eval=True,
+            seed=int(cfg["seed"]),
+        )
+        trainer = Trainer(
+            model=self.model,
+            args=args,
+            eval_dataset=eval_ds,
+            processing_class=self.tokenizer,
+            data_collator=collator,
+            compute_metrics=self._compute_metrics,
+        )
         metrics = trainer.evaluate()
         return {
             "acc": float(metrics.get("eval_accuracy", 0.0)),

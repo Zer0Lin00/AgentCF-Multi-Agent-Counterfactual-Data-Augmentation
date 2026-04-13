@@ -5,7 +5,6 @@ import pandas as pd
 from src.agents.generator import GeneratorAgent
 from src.agents.verifier import VerifierAgent
 
-
 async def build_single_cf(df: pd.DataFrame, config: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
     generator = GeneratorAgent(config)
     verifier = VerifierAgent(config)
@@ -36,4 +35,3 @@ async def build_single_cf(df: pd.DataFrame, config: dict) -> tuple[pd.DataFrame,
     aug = pd.DataFrame(rows, columns=["id", "text", "label", "source"])
     ver = pd.DataFrame(verifications)
     return aug, ver
-

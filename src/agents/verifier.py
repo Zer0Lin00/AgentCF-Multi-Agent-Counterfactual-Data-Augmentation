@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import os
 import re
+from functools import lru_cache
 from typing import Any
+
+import torch
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from src.metrics.minimality import edit_similarity
 from src.metrics.quality_score import final_quality_score
@@ -35,11 +40,24 @@ def _tokenize(text: str) -> list[str]:
     return re.findall(r"[A-Za-z']+", text.lower())
 
 
+@lru_cache(maxsize=2)
+def _load_label_model(model_name: str) -> tuple[AutoTokenizer, AutoModelForSequenceClassification]:
+    os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name)
+    model.eval()
+    model.to("cpu")
+    return tokenizer, model
+
+
 class VerifierAgent:
     def __init__(self, config: dict[str, Any]) -> None:
         self.config = config
         self.thresholds = config["thresholds"]
         self.weights = config["weights"]
+        self.label_model_name = str(
+            config.get("verification", {}).get("label_model_name", "distilbert-base-uncased-finetuned-sst-2-english")
+        )
 
     def verify(
         self,
@@ -77,14 +95,14 @@ class VerifierAgent:
         }
 
     def _label_score(self, text: str, target_label: int) -> float:
-        toks = _tokenize(text)
-        pos = sum(t in POS_WORDS for t in toks)
-        neg = sum(t in NEG_WORDS for t in toks)
-        if target_label == 1:
-            raw = (pos + 1) / (pos + neg + 2)
-        else:
-            raw = (neg + 1) / (pos + neg + 2)
-        return float(min(max(raw, 0.0), 1.0))
+        tokenizer, model = _load_label_model(self.label_model_name)
+        with torch.no_grad():
+            batch = tokenizer(text, truncation=True, max_length=128, return_tensors="pt")
+            logits = model(**batch).logits
+            probs = torch.softmax(logits, dim=-1)[0].tolist()
+        if len(probs) < 2:
+            return 0.0
+        return float(probs[int(target_label)])
 
     def _consistency_score(self, original: str, candidate: str, plan: dict[str, Any]) -> float:
         raw_preserve = plan.get("elements_to_preserve", [])
@@ -111,7 +129,7 @@ class VerifierAgent:
     @staticmethod
     def _critique(label_score: float, semantic_score: float, min_score: float) -> str:
         issues = []
-        if label_score < 0.8:
+        if label_score < 0.75:
             issues.append("sentiment flip is insufficient")
         if semantic_score < 0.8:
             issues.append("semantic drift is too large")

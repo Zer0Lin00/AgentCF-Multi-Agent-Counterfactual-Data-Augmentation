@@ -1,6 +1,14 @@
 ﻿extends: default.yaml
 augmentation:
   method: agentcf
-  num_candidates: 3
-  keep_top_k: 1
-  max_retry_rounds: 2
+  num_candidates: 5
+  keep_top_k: 2
+  max_retry_rounds: 3
+thresholds:
+  label_score: 0.75
+  final_score: 0.68
+  percentile_keep: 0.50
+verification:
+  label_model_name: distilbert-base-uncased-finetuned-sst-2-english
+runtime:
+  release_vllm_after_generation: true

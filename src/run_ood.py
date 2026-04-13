@@ -8,17 +8,16 @@ import subprocess
 import time
 
 import pandas as pd
-from sklearn.model_selection import train_test_split
 
 from src.augmentation.agentcf_pipeline import build_agentcf_aug
-from src.augmentation.single_agent import build_single_agent_cf
 from src.augmentation.single_cf import build_single_cf
 from src.augmentation.standard_aug import build_standard_aug
 from src.data.load_data import load_dataset_splits, maybe_subsample, save_splits
 from src.data.preprocess import preprocess_df
 from src.models.classifier import HFClassifier
-from src.models.evaluate import save_main_table, save_quality_table
+from src.models.evaluate import save_quality_table
 from src.utils.config import load_config
+from src.utils.runtime import LLM_METHODS
 from src.utils.seed import set_seed
 
 
@@ -34,18 +33,8 @@ def _merge_train(original: pd.DataFrame, aug: pd.DataFrame, ratio: float) -> pd.
     return pd.concat([base, picked[["id", "text", "label", "source"]]], ignore_index=True)
 
 
-def _sample_stats(method: str, aug_df: pd.DataFrame, ver_df: pd.DataFrame) -> tuple[int, int]:
-    if method == "No Augmentation":
-        return 0, 0
-    if method == "Standard Augmentation":
-        return len(aug_df), len(aug_df)
-    generated = len(ver_df) if not ver_df.empty else len(aug_df)
-    selected = len(aug_df)
-    return generated, selected
-
-
 def _release_local_vllm(cfg: dict, method: str, already_released: bool) -> bool:
-    if already_released or method != "AgentCF (Ours)":
+    if already_released or method not in LLM_METHODS:
         return already_released
     runtime_cfg = cfg.get("runtime", {})
     if not runtime_cfg.get("release_vllm_after_generation", False):
@@ -58,33 +47,29 @@ def _release_local_vllm(cfg: dict, method: str, already_released: bool) -> bool:
     return True
 
 
-async def run_experiment(config_path: str) -> None:
+async def run_ood(config_path: str) -> None:
     cfg = load_config(config_path)
     set_seed(int(cfg["seed"]))
     output_root = Path(cfg.get("output_root", "outputs"))
 
-    splits = load_dataset_splits(cfg["dataset"])
-    splits = {k: preprocess_df(v) for k, v in splits.items()}
-    low_resource_ratio = float(cfg.get("low_resource_ratio", 1.0))
-    if 0 < low_resource_ratio < 1.0:
-        sampled, _ = train_test_split(
-            splits["train"],
-            train_size=low_resource_ratio,
-            stratify=splits["train"]["label"],
-            random_state=int(cfg["seed"]),
-        )
-        splits["train"] = sampled.reset_index(drop=True)
-    splits["train"] = maybe_subsample(splits["train"], int(cfg.get("train_samples", 0)), int(cfg["seed"]))
-    splits["validation"] = maybe_subsample(
-        splits["validation"], int(cfg.get("eval_samples", 0)), int(cfg["seed"])
-    )
-    save_splits(splits, str(output_root / "data" / "processed"))
+    id_splits = load_dataset_splits(cfg["dataset"])
+    id_splits = {k: preprocess_df(v) for k, v in id_splits.items()}
+    id_splits["train"] = maybe_subsample(id_splits["train"], int(cfg.get("train_samples", 0)), int(cfg["seed"]))
+    id_splits["validation"] = maybe_subsample(id_splits["validation"], int(cfg.get("eval_samples", 0)), int(cfg["seed"]))
+    save_splits(id_splits, str(output_root / "data" / "processed"))
 
-    train_df = splits["train"]
-    val_df = splits["validation"]
-    test_df = splits.get("test", val_df)
+    ood_splits = load_dataset_splits(cfg["ood_dataset"])
+    ood_splits = {k: preprocess_df(v) for k, v in ood_splits.items()}
+    ood_eval = ood_splits["test"].reset_index(drop=True)
+    ood_eval_samples = int(cfg.get("ood_eval_samples", 0))
+    if ood_eval_samples > 0:
+        ood_eval = maybe_subsample(ood_eval, ood_eval_samples, int(cfg["seed"]))
+    save_splits({"ood_test": ood_eval}, str(output_root / "data" / "processed"))
+
+    train_df = id_splits["train"]
+    val_df = id_splits["validation"]
+    id_test_df = id_splits.get("test", val_df)
     ratio = float(cfg["augmentation"].get("ratio", 1.0))
-
     methods = cfg.get(
         "methods",
         [
@@ -97,11 +82,11 @@ async def run_experiment(config_path: str) -> None:
     )
 
     quality_rows: list[dict] = []
-    result_rows: list[dict] = []
+    ood_rows: list[dict] = []
     vllm_released = False
+
     for method in methods:
         clf = HFClassifier(model_name=cfg["model_name"], max_length=int(cfg["max_length"]))
-        aug_method = str(cfg.get("augmentation", {}).get("method", "agentcf")).lower()
         if method == "No Augmentation":
             aug_df = pd.DataFrame(columns=["id", "text", "label", "source"])
             ver_df = pd.DataFrame()
@@ -118,35 +103,34 @@ async def run_experiment(config_path: str) -> None:
                 ]
                 aug_df = aug_df[aug_df["id"].isin(ver_df["id"])]
         else:
-            if aug_method == "single_agent":
-                aug_df, ver_df = await build_single_agent_cf(train_df, cfg)
+            selected_path = output_root / "selected_counterfactuals" / "selected.jsonl"
+            ver_path = output_root / "checkpoints" / "verifications.jsonl"
+            if selected_path.exists() and ver_path.exists():
+                print("[AgentCF] Found existing checkpoint, skipping LLM generation.", flush=True)
+                aug_df = pd.read_json(selected_path, lines=True)
+                ver_df = pd.read_json(ver_path, lines=True)
             else:
-                selected_path = output_root / "selected_counterfactuals" / "selected.jsonl"
-                ver_path = output_root / "checkpoints" / "verifications.jsonl"
-                if selected_path.exists() and ver_path.exists():
-                    print("[AgentCF] Found existing checkpoint, skipping LLM generation.", flush=True)
-                    aug_df = pd.read_json(selected_path, lines=True)
-                    ver_df = pd.read_json(ver_path, lines=True)
-                else:
-                    aug_df, _ = await build_agentcf_aug(train_df, cfg)
-                    ver_df = pd.read_json(ver_path, lines=True)
+                aug_df, _ = await build_agentcf_aug(train_df, cfg)
+                ver_df = pd.read_json(ver_path, lines=True)
 
         vllm_released = _release_local_vllm(cfg, method, vllm_released)
         merged_train = _merge_train(train_df, aug_df, ratio=ratio)
-        generated_samples, selected_samples = _sample_stats(method, aug_df, ver_df)
-        out_dir = output_root / "checkpoints" / method.lower().replace(" ", "_").replace("+", "plus").replace("-", "_")
-        val_metrics = clf.train_and_eval(merged_train, val_df, cfg, out_dir=str(out_dir))
-        test_metrics = clf.evaluate_df(test_df, cfg, out_dir=str(out_dir / "test_eval"))
-        result_rows.append(
+        run_dir = output_root / "checkpoints" / method.lower().replace(" ", "_").replace("+", "plus").replace("-", "_")
+        val_metrics = clf.train_and_eval(merged_train, val_df, cfg, out_dir=str(run_dir))
+        id_metrics = clf.evaluate_df(id_test_df, cfg, out_dir=str(run_dir / "id_test_eval"))
+        ood_metrics = clf.evaluate_df(ood_eval, cfg, out_dir=str(run_dir / "ood_eval"))
+
+        ood_rows.append(
             {
                 "Method": method,
-                "SST-2 Acc": round(test_metrics["acc"], 4),
-                "SST-2 F1": round(test_metrics["f1"], 4),
+                "ID Acc": round(id_metrics["acc"], 4),
+                "ID F1": round(id_metrics["f1"], 4),
                 "Validation Acc": round(val_metrics["acc"], 4),
                 "Validation F1": round(val_metrics["f1"], 4),
-                "TrainSize": len(merged_train),
-                "Generated Samples": generated_samples,
-                "Selected Samples": selected_samples,
+                "OOD Dataset": str(cfg["ood_dataset"]),
+                "OOD Acc": round(ood_metrics["acc"], 4),
+                "OOD F1": round(ood_metrics["f1"], 4),
+                "Robustness Gap": round(id_metrics["acc"] - ood_metrics["acc"], 4),
             }
         )
 
@@ -161,7 +145,9 @@ async def run_experiment(config_path: str) -> None:
                 }
             )
 
-    save_main_table(result_rows, out_path=str(output_root / "tables" / "main_results.csv"))
+    out = output_root / "tables" / "ood_results.csv"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(ood_rows).to_csv(out, index=False)
     if quality_rows:
         save_quality_table(quality_rows, out_path=str(output_root / "tables" / "quality_results.csv"))
 
@@ -170,7 +156,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/default.yaml")
     args = parser.parse_args()
-    asyncio.run(run_experiment(args.config))
+    asyncio.run(run_ood(args.config))
 
 
 if __name__ == "__main__":

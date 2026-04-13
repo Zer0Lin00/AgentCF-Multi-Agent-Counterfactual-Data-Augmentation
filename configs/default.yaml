@@ -8,7 +8,7 @@ learning_rate: 2e-5
 epochs: 2
 seed: 42
 train_samples: 1000
-eval_samples: 500
+eval_samples: 0
 output_root: outputs
 
 augmentation:
@@ -39,6 +39,7 @@ runtime:
   retry_backoff: exponential
   max_retries: 3
   checkpoint_every_n_samples: 50
+  release_vllm_after_generation: false
 
 llm:
   enabled: true
@@ -47,4 +48,3 @@ llm:
   planner_model_env: PLANNER_MODEL
   generator_model_env: GENERATOR_MODEL
   verifier_model_env: VERIFIER_MODEL
-

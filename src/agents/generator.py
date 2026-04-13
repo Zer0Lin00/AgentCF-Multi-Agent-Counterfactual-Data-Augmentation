@@ -45,7 +45,7 @@ class GeneratorAgent:
     ) -> list[dict[str, str]]:
         num_candidates = int(self.config["augmentation"]["num_candidates"])
         if not self.llm.enabled:
-            return self._rule_candidates(sample["text"], target_label, num_candidates)
+            raise RuntimeError("Generator LLM is disabled; rule fallback is not allowed for this run")
 
         prompt = self.prompt_template.format(
             id=sample["id"],
@@ -58,8 +58,8 @@ class GeneratorAgent:
         try:
             payload = await self.llm.json_completion(stage="generator", prompt=prompt, max_retries=3)
             return self._normalize_candidates(payload)
-        except Exception:
-            return self._rule_candidates(sample["text"], target_label, num_candidates)
+        except Exception as exc:
+            raise RuntimeError(f"Generator LLM call failed; rule fallback is disabled: {exc}") from exc
 
     def _rule_candidates(self, text: str, target_label: int, n: int) -> list[dict[str, str]]:
         mapping = POS_TO_NEG if target_label == 0 else NEG_TO_POS

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
 
@@ -24,7 +23,7 @@ class SelectorAgent:
         if df.empty:
             return []
 
-        if self.thresholds.get("filtering_mode") == "dynamic_percentile":
+        if self.thresholds.get("filtering_mode") == "dynamic_percentile" and len(df) > self.top_k:
             keep = float(self.thresholds.get("percentile_keep", 0.3))
             quantile = max(0.0, min(1.0, 1.0 - keep))
             cut = float(df["final_score"].quantile(quantile))
@@ -44,4 +43,3 @@ class SelectorAgent:
             }
             for _, row in picked.iterrows()
         ]
-

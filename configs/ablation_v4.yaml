@@ -1,0 +1,7 @@
+extends: agentcf.yaml
+ablation:
+  w_o_planner: false
+  w_o_verifier_feedback: false
+  w_o_selector: false
+  w_o_dynamic_threshold: false
+  single_agent_version: false

@@ -4,3 +4,6 @@ data/
 publish_repo/
 __pycache__/
 *.pyc
+configs/tmp_*.yaml
+tmp_sync/
+tmp_sync_opt/

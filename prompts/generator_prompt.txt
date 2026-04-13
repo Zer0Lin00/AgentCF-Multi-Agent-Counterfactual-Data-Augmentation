@@ -5,6 +5,15 @@
 2) 仅修改必要的情感/风格相关片段
 3) 候选之间保持多样性
 4) 若提供 critique，必须优先修复 critique 指出的失败点
+5) 严格只返回一个 JSON 对象，不要使用 Markdown 代码块，不要附加任何说明文字
+
+输出格式：
+{{
+  "candidates": [
+    {{"candidate_id": "c1", "text": "..."}},
+    {{"candidate_id": "c2", "text": "..."}}
+  ]
+}}
 
 输入：
 id={id}

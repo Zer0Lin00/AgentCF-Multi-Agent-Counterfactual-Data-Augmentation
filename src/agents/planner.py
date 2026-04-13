@@ -15,7 +15,7 @@ class PlannerAgent:
 
     async def plan(self, sample: dict[str, Any], target_label: int) -> dict[str, Any]:
         if not self.llm.enabled:
-            return self._rule_plan(sample, target_label)
+            raise RuntimeError("Planner LLM is disabled; rule fallback is not allowed for this run")
         prompt = self.prompt_template.format(
             id=sample["id"],
             text=sample["text"],
@@ -24,8 +24,8 @@ class PlannerAgent:
         )
         try:
             return await self.llm.json_completion(stage="planner", prompt=prompt, max_retries=3)
-        except Exception:
-            return self._rule_plan(sample, target_label)
+        except Exception as exc:
+            raise RuntimeError(f"Planner LLM call failed; rule fallback is disabled: {exc}") from exc
 
     def _rule_plan(self, sample: dict[str, Any], target_label: int) -> dict[str, Any]:
         words = sample["text"].split()
@@ -43,4 +43,3 @@ class PlannerAgent:
                 "keep fluent and natural",
             ],
         }
-

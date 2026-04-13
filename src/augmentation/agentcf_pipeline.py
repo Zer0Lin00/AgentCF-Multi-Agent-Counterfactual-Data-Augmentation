@@ -81,19 +81,17 @@ async def build_agentcf_aug(df: pd.DataFrame, config: dict[str, Any]) -> tuple[p
     selector = SelectorAgent(config)
     max_retry_rounds = int(config["augmentation"]["max_retry_rounds"])
     checkpoint_every = int(config["runtime"]["checkpoint_every_n_samples"])
-
+    output_root = Path(config.get("output_root", "outputs"))
+    checkpoints_dir = output_root / "checkpoints"
+    candidates_dir = output_root / "generated_candidates"
+    selected_dir = output_root / "selected_counterfactuals"
     selected_rows: list[dict] = []
     selected_buffer: list[dict] = []
     plans_buffer: list[dict] = []
     candidates_buffer: list[dict] = []
     verifications_buffer: list[dict] = []
-    plans_path = Path("outputs/checkpoints/plans.jsonl")
-    candidates_path = Path("outputs/generated_candidates/candidates.jsonl")
-    verifications_path = Path("outputs/checkpoints/verifications.jsonl")
-    selected_path = Path("outputs/selected_counterfactuals/selected.jsonl")
-    for p in [plans_path, candidates_path, verifications_path, selected_path]:
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text("", encoding="utf-8")
+    total_candidates = 0
+    total_verifications = 0
 
     sample_records = df.to_dict(orient="records")
     for idx, sample in enumerate(sample_records, start=1):
@@ -105,20 +103,25 @@ async def build_agentcf_aug(df: pd.DataFrame, config: dict[str, Any]) -> tuple[p
         plans_buffer.extend(plans)
         candidates_buffer.extend(cands)
         verifications_buffer.extend(vers)
+        total_candidates += len(cands)
+        total_verifications += len(vers)
 
         if idx % checkpoint_every == 0 or idx == len(sample_records):
-            append_jsonl(plans_path, plans_buffer)
-            append_jsonl(candidates_path, candidates_buffer)
-            append_jsonl(verifications_path, verifications_buffer)
-            append_jsonl(selected_path, selected_buffer)
+            append_jsonl(checkpoints_dir / "plans.jsonl", plans_buffer)
+            append_jsonl(candidates_dir / "candidates.jsonl", candidates_buffer)
+            append_jsonl(checkpoints_dir / "verifications.jsonl", verifications_buffer)
+            append_jsonl(selected_dir / "selected.jsonl", selected_buffer)
             plans_buffer.clear()
             candidates_buffer.clear()
             verifications_buffer.clear()
             selected_buffer.clear()
+            print(f"[AgentCF] checkpoint: {idx}/{len(sample_records)} samples processed", flush=True)
 
     aug_df = pd.DataFrame(selected_rows, columns=["id", "text", "label", "source", "candidate_id", "final_score"])
     stats = {
         "input_samples": len(df),
+        "generated_candidates": total_candidates,
+        "verified_candidates": total_verifications,
         "selected_samples": len(aug_df),
         "dropped_samples": max(0, len(df) - len(aug_df)),
     }

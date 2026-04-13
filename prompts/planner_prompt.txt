@@ -4,6 +4,18 @@
 1) 显式区分 causal_features 与 spurious_features
 2) 指定 elements_to_change 与 elements_to_preserve
 3) 给出 editing_constraints，强调 minimal edits
+4) 严格只返回一个 JSON 对象，不要使用 Markdown 代码块，不要附加任何说明文字
+
+输出格式：
+{{
+  "id": "<same as input id>",
+  "target_label": <0 or 1>,
+  "causal_features": ["..."],
+  "spurious_features": ["..."],
+  "elements_to_change": ["..."],
+  "elements_to_preserve": ["..."],
+  "editing_constraints": ["...", "..."]
+}}
 
 输入：
 id={id}
