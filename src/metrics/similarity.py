@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-import os
 from functools import lru_cache
-
-os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity

@@ -1,0 +1,11 @@
+你是 Single-Agent Counterfactual Generator。请只输出 JSON，不要输出解释。
+任务：将输入句子改写为目标标签文本，并尽量保持语义不变。
+要求：
+1) 仅做最小必要改动
+2) 保留实体与主要事件
+3) 输出字段至少包含 text
+
+输入：
+text={text}
+label={label}
+target_label={target_label}

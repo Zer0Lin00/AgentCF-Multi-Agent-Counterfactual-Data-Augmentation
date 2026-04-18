@@ -1,5 +1,6 @@
 ﻿.env
 outputs/
 data/
+publish_repo/
 __pycache__/
 *.pyc

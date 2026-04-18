@@ -87,7 +87,16 @@ class VerifierAgent:
         return float(min(max(raw, 0.0), 1.0))
 
     def _consistency_score(self, original: str, candidate: str, plan: dict[str, Any]) -> float:
-        preserve = [str(w).lower() for w in plan.get("elements_to_preserve", []) if w]
+        raw_preserve = plan.get("elements_to_preserve", [])
+        preserve: list[str] = []
+        if isinstance(raw_preserve, list):
+            for item in raw_preserve:
+                if isinstance(item, str):
+                    preserve.append(item.lower())
+                elif isinstance(item, dict):
+                    text = item.get("text") or item.get("token") or item.get("name")
+                    if isinstance(text, str):
+                        preserve.append(text.lower())
         if not preserve:
             return 0.8
         o = original.lower()
@@ -109,4 +118,3 @@ class VerifierAgent:
         if min_score < 0.7:
             issues.append("edits are too large")
         return "; ".join(issues) if issues else "improve fluency and constraints"
-

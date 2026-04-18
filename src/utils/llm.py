@@ -22,9 +22,9 @@ class AsyncRateLimiter:
         async with self._lock:
             now = asyncio.get_running_loop().time()
             delay = self._next_time - now
-            self._next_time = max(self._next_time, now) + self._interval
-        if delay > 0:
-            await asyncio.sleep(delay)
+            if delay > 0:
+                await asyncio.sleep(delay)
+            self._next_time = max(self._next_time + self._interval, now + self._interval)
 
 
 def _extract_json_block(text: str) -> dict[str, Any]:

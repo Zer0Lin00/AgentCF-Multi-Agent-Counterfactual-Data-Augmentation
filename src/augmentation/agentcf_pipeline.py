@@ -74,9 +74,6 @@ async def _process_one(
     return chosen, [plan], all_candidates, all_verifications
 
 
-CONCURRENCY = 50
-
-
 async def build_agentcf_aug(df: pd.DataFrame, config: dict[str, Any]) -> tuple[pd.DataFrame, dict[str, int]]:
     planner = PlannerAgent(config)
     generator = GeneratorAgent(config)
@@ -85,37 +82,41 @@ async def build_agentcf_aug(df: pd.DataFrame, config: dict[str, Any]) -> tuple[p
     max_retry_rounds = int(config["augmentation"]["max_retry_rounds"])
     checkpoint_every = int(config["runtime"]["checkpoint_every_n_samples"])
 
-    sample_records = df.to_dict(orient="records")
-    sem = asyncio.Semaphore(CONCURRENCY)
-    completed = 0
     selected_rows: list[dict] = []
+    selected_buffer: list[dict] = []
     plans_buffer: list[dict] = []
     candidates_buffer: list[dict] = []
     verifications_buffer: list[dict] = []
+    plans_path = Path("outputs/checkpoints/plans.jsonl")
+    candidates_path = Path("outputs/generated_candidates/candidates.jsonl")
+    verifications_path = Path("outputs/checkpoints/verifications.jsonl")
+    selected_path = Path("outputs/selected_counterfactuals/selected.jsonl")
+    for p in [plans_path, candidates_path, verifications_path, selected_path]:
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text("", encoding="utf-8")
 
-    async def bounded(sample):
-        async with sem:
-            return await _process_one(sample, planner, generator, verifier, selector, max_retry_rounds)
-
-    results = await asyncio.gather(*[bounded(s) for s in sample_records])
-
-    for idx, (selected, plans, cands, vers) in enumerate(results, start=1):
+    sample_records = df.to_dict(orient="records")
+    for idx, sample in enumerate(sample_records, start=1):
+        selected, plans, cands, vers = await _process_one(
+            sample, planner, generator, verifier, selector, max_retry_rounds
+        )
         selected_rows.extend(selected)
+        selected_buffer.extend(selected)
         plans_buffer.extend(plans)
         candidates_buffer.extend(cands)
         verifications_buffer.extend(vers)
 
         if idx % checkpoint_every == 0 or idx == len(sample_records):
-            append_jsonl("outputs/checkpoints/plans.jsonl", plans_buffer)
-            append_jsonl("outputs/generated_candidates/candidates.jsonl", candidates_buffer)
-            append_jsonl("outputs/checkpoints/verifications.jsonl", verifications_buffer)
-            append_jsonl("outputs/selected_counterfactuals/selected.jsonl", selected_rows)
+            append_jsonl(plans_path, plans_buffer)
+            append_jsonl(candidates_path, candidates_buffer)
+            append_jsonl(verifications_path, verifications_buffer)
+            append_jsonl(selected_path, selected_buffer)
             plans_buffer.clear()
             candidates_buffer.clear()
             verifications_buffer.clear()
-            print(f"[AgentCF] checkpoint: {idx}/{len(sample_records)} samples processed", flush=True)
+            selected_buffer.clear()
 
-    aug_df = pd.DataFrame(selected_rows, columns=["id", "text", "label", "source", "candidate_id", "final_score"]) if selected_rows else pd.DataFrame(columns=["id", "text", "label", "source", "candidate_id", "final_score"])
+    aug_df = pd.DataFrame(selected_rows, columns=["id", "text", "label", "source", "candidate_id", "final_score"])
     stats = {
         "input_samples": len(df),
         "selected_samples": len(aug_df),

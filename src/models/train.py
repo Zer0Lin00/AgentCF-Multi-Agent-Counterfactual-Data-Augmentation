@@ -5,8 +5,10 @@ import asyncio
 from pathlib import Path
 
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 from src.augmentation.agentcf_pipeline import build_agentcf_aug
+from src.augmentation.single_agent import build_single_agent_cf
 from src.augmentation.single_cf import build_single_cf
 from src.augmentation.standard_aug import build_standard_aug
 from src.data.load_data import load_dataset_splits, maybe_subsample, save_splits
@@ -35,6 +37,15 @@ async def run_experiment(config_path: str) -> None:
 
     splits = load_dataset_splits(cfg["dataset"])
     splits = {k: preprocess_df(v) for k, v in splits.items()}
+    low_resource_ratio = float(cfg.get("low_resource_ratio", 1.0))
+    if 0 < low_resource_ratio < 1.0:
+        sampled, _ = train_test_split(
+            splits["train"],
+            train_size=low_resource_ratio,
+            stratify=splits["train"]["label"],
+            random_state=int(cfg["seed"]),
+        )
+        splits["train"] = sampled.reset_index(drop=True)
     splits["train"] = maybe_subsample(splits["train"], int(cfg.get("train_samples", 0)), int(cfg["seed"]))
     splits["validation"] = maybe_subsample(
         splits["validation"], int(cfg.get("eval_samples", 0)), int(cfg["seed"])
@@ -60,6 +71,7 @@ async def run_experiment(config_path: str) -> None:
     result_rows: list[dict] = []
     for method in methods:
         clf = HFClassifier(model_name=cfg["model_name"], max_length=int(cfg["max_length"]))
+        aug_method = str(cfg.get("augmentation", {}).get("method", "agentcf")).lower()
         if method == "No Augmentation":
             aug_df = pd.DataFrame(columns=["id", "text", "label", "source"])
             ver_df = pd.DataFrame()
@@ -76,15 +88,12 @@ async def run_experiment(config_path: str) -> None:
                 ]
                 aug_df = aug_df[aug_df["id"].isin(ver_df["id"])]
         else:
-            selected_path = Path("outputs/selected_counterfactuals/selected.jsonl")
-            ver_path = Path("outputs/checkpoints/verifications.jsonl")
-            if selected_path.exists() and ver_path.exists():
-                print("[AgentCF] Found existing checkpoint, skipping LLM generation.", flush=True)
-                aug_df = pd.read_json(selected_path, lines=True)
-                ver_df = pd.read_json(ver_path, lines=True)
+            if aug_method == "single_agent":
+                aug_df, ver_df = await build_single_agent_cf(train_df, cfg)
             else:
-                aug_df, stats = await build_agentcf_aug(train_df, cfg)
-                ver_df = pd.read_json(ver_path, lines=True)
+                aug_df, _stats = await build_agentcf_aug(train_df, cfg)
+                ver_path = "outputs/checkpoints/verifications.jsonl"
+                ver_df = pd.read_json(ver_path, lines=True) if Path(ver_path).exists() else pd.DataFrame()
 
         merged_train = _merge_train(train_df, aug_df, ratio=ratio)
         out_dir = f"outputs/checkpoints/{method.lower().replace(' ', '_').replace('+', 'plus').replace('-', '_')}"

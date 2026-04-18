@@ -1,0 +1,18 @@
+﻿extends: default.yaml
+train_samples: 120
+eval_samples: 120
+epochs: 1
+batch_size: 8
+max_length: 128
+methods:
+  - No Augmentation
+  - AgentCF (Ours)
+augmentation:
+  method: agentcf
+  ratio: 0.5
+  num_candidates: 2
+  keep_top_k: 1
+  max_retry_rounds: 1
+runtime:
+  rate_limit_qps: 1
+  checkpoint_every_n_samples: 20

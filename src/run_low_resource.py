@@ -10,12 +10,11 @@ from src.utils.config import load_config
 
 async def run_low_resource(config_path: str) -> None:
     base = load_config(config_path)
-    for ratio, sample_count in [("10%", 500), ("30%", 1500), ("50%", 3000), ("100%", base.get("train_samples", 0))]:
+    for ratio, r in [("10%", 0.1), ("30%", 0.3), ("50%", 0.5), ("100%", 1.0)]:
         cfg = deepcopy(base)
-        cfg["train_samples"] = sample_count
+        cfg["low_resource_ratio"] = r
+        cfg["train_samples"] = 0
         cfg["output_root"] = f"outputs/low_resource/{ratio}"
-        # Save a temporary config-less run by monkey patching expected fields.
-        # Reuse run_experiment by writing config to disk would be equivalent.
         await run_experiment_from_dict(cfg)
 
 
@@ -38,4 +37,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
