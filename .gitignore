@@ -1,5 +1,9 @@
 ﻿.env
 outputs/
+!outputs/remote_sync_repeats_v4_20260419/
+!outputs/remote_sync_repeats_v4_20260419/repeats_summary/
+!outputs/remote_sync_repeats_v4_20260419/repeats_summary/*.csv
+!outputs/remote_sync_repeats_v4_20260419/repeats_summary/*.md
 data/
 publish_repo/
 __pycache__/
