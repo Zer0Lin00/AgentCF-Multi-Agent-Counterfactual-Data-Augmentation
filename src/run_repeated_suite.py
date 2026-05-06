@@ -76,7 +76,7 @@ async def run_suite(tasks: list[str], seeds: list[int]) -> None:
     if "low_resource" in tasks:
         await _run_low_resource(configs, seeds)
     if "ablation" in tasks:
-        await _run_ablation("configs/ablation.yaml", seeds)
+        await _run_ablation("configs/ablation_v4.yaml", seeds)
     if "ood" in tasks:
         await _run_ood(configs, seeds)
 

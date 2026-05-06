@@ -6,6 +6,8 @@ outputs/
 !outputs/remote_sync_repeats_v4_20260419/repeats_summary/*.md
 data/
 publish_repo/
+.codex
+.codex/
 __pycache__/
 *.pyc
 configs/tmp_*.yaml

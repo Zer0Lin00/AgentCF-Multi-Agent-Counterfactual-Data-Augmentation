@@ -81,6 +81,38 @@ def summarize_ood(root: Path) -> pd.DataFrame:
     return _group_mean_std(ood_df, ["Method", "OOD Dataset"], ["ID Acc", "OOD Acc", "Robustness Gap"])
 
 
+def align_full_agentcf_ablation(
+    ablation_summary: pd.DataFrame,
+    main_summary: pd.DataFrame,
+    quality_summary: pd.DataFrame,
+) -> pd.DataFrame:
+    if ablation_summary.empty or main_summary.empty:
+        return ablation_summary
+
+    main_rows = main_summary[main_summary["Method"] == "AgentCF (Ours)"]
+    if main_rows.empty:
+        return ablation_summary
+
+    out = ablation_summary.copy()
+    full_mask = out["Variant"] == "full_agentcf"
+    if not full_mask.any():
+        return out
+
+    main_row = main_rows.iloc[0]
+    out.loc[full_mask, "Acc mean"] = main_row["SST-2 Acc mean"]
+    out.loc[full_mask, "Acc std"] = main_row["SST-2 Acc std"]
+    out.loc[full_mask, "F1 mean"] = main_row["SST-2 F1 mean"]
+    out.loc[full_mask, "F1 std"] = main_row["SST-2 F1 std"]
+
+    if not quality_summary.empty:
+        quality_rows = quality_summary[quality_summary["Method"] == "AgentCF (Ours)"]
+        if not quality_rows.empty:
+            quality_row = quality_rows.iloc[0]
+            out.loc[full_mask, "Label Success mean"] = quality_row["Label Success mean"]
+            out.loc[full_mask, "Label Success std"] = quality_row["Label Success std"]
+    return out
+
+
 def _to_markdown_table(df: pd.DataFrame) -> str:
     columns = list(df.columns)
     lines = [
@@ -108,6 +140,7 @@ def main() -> None:
     low_summary = summarize_low_resource(repeats_root)
     ablation_summary = summarize_ablation(project_root)
     ood_summary = summarize_ood(repeats_root)
+    ablation_summary = align_full_agentcf_ablation(ablation_summary, main_summary, quality_summary)
 
     main_summary.to_csv(output_dir / "main_repeats_summary.csv", index=False)
     if not quality_summary.empty:

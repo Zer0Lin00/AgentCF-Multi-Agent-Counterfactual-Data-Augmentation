@@ -1,3 +1,3 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 set -e
-python -m src.run_ablation "$@"
+python3 -m src.run_ablation "$@"
