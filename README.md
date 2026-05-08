@@ -6,6 +6,17 @@
 - 低资源与消融脚本
 - 自动质量评估与结果表导出
 
+## 近期改进（摘要）
+
+我们针对工程化与可复现性做了多项改进：
+- 增加 checkpoint / 断点续跑支持：生成阶段（selected.jsonl / verifications.jsonl）可被重用，避免重复调用 LLM。
+- 重构 `verifier` 的加权 scoring 与阈值逻辑，提高质量评估一致性；新增可直接从 `verifications.jsonl` 生成 `quality_results.csv` 的工具。
+- 支持 NLI（MNLI/HANS）判定逻辑与相应 prompt，便于扩展到 NLI 任务。
+- 新增 `no-filter` 变体与多种 configs（见 `configs/`），便于做消融与对照实验。
+- 改进并发与显存管理：在生成后自动释放 vLLM（`runtime.release_vllm_after_generation`），并提供 `checkpoint_every_n_samples` 与 `concurrency` 配置项。
+
+这些改进主要体现在 `configs/`、`src/agents/`、`src/augmentation/` 与 `scripts/` 中。
+
 ## 1. 环境依赖
 
 Python 3.12，CUDA 12.8（Blackwell 架构 GPU 需要）。
