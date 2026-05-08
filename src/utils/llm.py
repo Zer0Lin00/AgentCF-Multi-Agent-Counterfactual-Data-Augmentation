@@ -173,8 +173,24 @@ class LLMClient:
         self._generator_model = os.getenv(llm_cfg.get("generator_model_env", "GENERATOR_MODEL"), "gpt-5.4-mini")
         self._verifier_model = os.getenv(llm_cfg.get("verifier_model_env", "VERIFIER_MODEL"), "gpt-5.4-mini")
         self._limiter = AsyncRateLimiter(config.get("runtime", {}).get("rate_limit_qps", 5))
-        self._client = AsyncOpenAI(api_key=api_key, base_url=base_url) if self.enabled else None
+        self._api_key = api_key
+        self._base_url = base_url
+        self._client: AsyncOpenAI | None = None
         self.total_calls = 0
+
+    def _get_client(self) -> AsyncOpenAI:
+        if self._client is None or self._client.is_closed():
+            self._client = AsyncOpenAI(
+                api_key=self._api_key,
+                base_url=self._base_url,
+                timeout=60.0,
+                max_retries=3,
+            )
+        return self._client
+
+    def _reset_client(self) -> None:
+        """强制重建 client，用于连接错误后的恢复"""
+        self._client = None
 
     def model_for(self, stage: str) -> str:
         return {
@@ -209,7 +225,7 @@ class LLMClient:
         )
 
     async def _repair_json(self, *, model: str, stage: str, raw_text: str) -> str:
-        if self._client is None:
+        if not self.enabled:
             return ""
         repair_prompt = (
             "Convert the following text into one valid JSON object only. "
@@ -218,7 +234,7 @@ class LLMClient:
             f"Raw text:\n{raw_text}"
         )
         await self._limiter.wait()
-        resp = await self._client.chat.completions.create(
+        resp = await self._get_client().chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": repair_prompt}],
             temperature=0.0,
@@ -227,13 +243,15 @@ class LLMClient:
         return resp.choices[0].message.content or ""
 
     async def json_completion(self, *, stage: str, prompt: str, max_retries: int = 3) -> dict[str, Any]:
-        if not self.enabled or self._client is None:
+        if not self.enabled:
             raise RuntimeError("LLM client is disabled")
         model = self.model_for(stage)
         for retry in range(max_retries + 1):
             try:
                 await self._limiter.wait()
-                resp = await self._client.chat.completions.create(
+                # 每次调用前都重新获取 client，确保连接有效
+                client = self._get_client()
+                resp = await client.chat.completions.create(
                     model=model,
                     messages=[{"role": "user", "content": prompt}],
                     temperature=self._temperature_for(stage),
@@ -271,17 +289,20 @@ class LLMClient:
                     if stage == "generator":
                         return _fallback_generator_payload(content)
                     raise
-            except Exception:
+            except Exception as e:
                 if retry >= max_retries:
                     raise
+                # 连接错误时强制重建 client
+                if "Cannot send a request" in str(e) or "Network is unreachable" in str(e) or "Connection" in str(e):
+                    self._reset_client()
                 await asyncio.sleep(2**retry)
         raise RuntimeError("Unexpected retry loop exit")
 
     async def _stream_text(self, *, model: str, prompt: str, stage: str) -> str:
-        if self._client is None:
+        if not self.enabled:
             return ""
         await self._limiter.wait()
-        stream = await self._client.chat.completions.create(
+        stream = await self._get_client().chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
             temperature=self._temperature_for(stage),

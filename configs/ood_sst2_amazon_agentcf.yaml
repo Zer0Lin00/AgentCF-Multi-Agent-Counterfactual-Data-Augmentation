@@ -1,0 +1,15 @@
+extends: agentcf.yaml
+dataset: sst2
+id_dataset: sst2
+ood_dataset: amazon_polarity
+ood_mode: true
+methods:
+  - No Augmentation
+  - Standard Augmentation
+  - Single-LLM Counterfactual
+  - Single-LLM + Filtering
+  - AgentCF (Ours)
+output_root: outputs/ood_sst2_amazon_agentcf_v1
+ood_eval_samples: 5000
+runtime:
+  release_vllm_after_generation: true

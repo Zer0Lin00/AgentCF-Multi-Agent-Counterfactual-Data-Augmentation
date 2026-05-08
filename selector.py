@@ -48,12 +48,22 @@ class SelectorAgent:
             df["shortcut_penalty"] = [
                 self._shortcut_penalty(original_tokens, str(text)) for text in df["candidate_text"]
             ]
+            df["contrast_bonus"] = [self._contrast_bonus(str(text)) for text in df["candidate_text"]]
+            df["syntax_preservation"] = [
+                self._syntax_preservation_score(original_tokens, str(text)) for text in df["candidate_text"]
+            ]
+            df["short_penalty"] = [self._short_candidate_penalty(str(text)) for text in df["candidate_text"]]
+            df["template_penalty"] = [self._template_penalty(original_tokens, str(text)) for text in df["candidate_text"]]
             df["selector_ood_score"] = (
-                0.45 * df["final_score"]
+                0.28 * df["final_score"]
                 + 0.20 * df.get("domain_invariant_score", df["label_score"])
-                + 0.20 * df.get("style_robustness_score", df["semantic_score"])
-                + 0.15 * df["semantic_score"]
+                + 0.18 * df.get("style_robustness_score", df["semantic_score"])
+                + 0.14 * df["semantic_score"]
+                + 0.10 * df["syntax_preservation"]
+                + 0.10 * df["contrast_bonus"]
                 - df["shortcut_penalty"]
+                - df["short_penalty"]
+                - df["template_penalty"]
             )
             df = df[df["selector_ood_score"] >= self.thresholds.get("selector_ood_score", 0.0)].copy()
             if df.empty:
@@ -89,6 +99,31 @@ class SelectorAgent:
         changed = original_tokens.symmetric_difference(candidate_tokens)
         if len(changed) <= 4 and changed & STRONG_SENTIMENT:
             return 0.18
-        if len(candidate_tokens) < 6:
-            return 0.12
+        return 0.0
+
+    @staticmethod
+    def _contrast_bonus(candidate_text: str) -> float:
+        review_markers = {"because", "although", "while", "but", "however", "overall", "yet", "still", "despite", "though"}
+        tokens = _tokens(candidate_text)
+        return 0.15 if tokens & review_markers else 0.0
+
+    @staticmethod
+    def _syntax_preservation_score(original_tokens: set[str], candidate_text: str) -> float:
+        candidate_tokens = _tokens(candidate_text)
+        if not original_tokens:
+            return 0.5
+        overlap = len(original_tokens & candidate_tokens) / max(len(original_tokens), 1)
+        return max(0.0, min(1.0, 0.4 + 0.6 * overlap))
+
+    @staticmethod
+    def _short_candidate_penalty(candidate_text: str) -> float:
+        token_count = len(_tokens(candidate_text))
+        return 0.18 if token_count < 8 else 0.0
+
+    @staticmethod
+    def _template_penalty(original_tokens: set[str], candidate_text: str) -> float:
+        candidate_tokens = _tokens(candidate_text)
+        changed = original_tokens.symmetric_difference(candidate_tokens)
+        if len(changed) <= 4 and changed & STRONG_SENTIMENT:
+            return 0.14
         return 0.0

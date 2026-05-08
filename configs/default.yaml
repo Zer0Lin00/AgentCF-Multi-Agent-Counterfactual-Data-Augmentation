@@ -7,6 +7,7 @@ batch_size: 16
 learning_rate: 2e-5
 epochs: 2
 seed: 42
+task_type: sentiment
 train_samples: 1000
 eval_samples: 0
 output_root: outputs
@@ -24,27 +25,21 @@ thresholds:
   semantic_score: 0.80
   minimality_score: 0.70
   final_score: 0.82
+  general_sentiment_score: 0.70
+  domain_invariant_score: 0.70
+  consistency_score: 0.50
+  style_robustness_score: 0.45
   filtering_mode: dynamic_percentile
   percentile_keep: 0.30
 
 weights:
-  label_score: 0.35
-  semantic_score: 0.30
+  label_score: 0.30
+  semantic_score: 0.35
   minimality_score: 0.20
   consistency_score: 0.15
+  difficulty_score: 0.00
 
 runtime:
-  async_enabled: true
-  rate_limit_qps: 5
-  retry_backoff: exponential
-  max_retries: 3
-  checkpoint_every_n_samples: 50
-  release_vllm_after_generation: false
-
-llm:
-  enabled: true
-  base_url_env: OPENAI_BASE_URL
-  api_key_env: OPENAI_API_KEY
-  planner_model_env: PLANNER_MODEL
-  generator_model_env: GENERATOR_MODEL
-  verifier_model_env: VERIFIER_MODEL
+  concurrency: 100
+  rate_limit_qps: 100
+  checkpoint_every_n_samples: 100

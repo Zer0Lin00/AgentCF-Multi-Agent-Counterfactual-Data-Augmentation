@@ -32,8 +32,16 @@ NEG_TO_POS.update(
 class GeneratorAgent:
     def __init__(self, config: dict[str, Any], prompt_path: str = "prompts/generator_prompt.txt") -> None:
         self.config = config
-        self.prompt_template = Path(prompt_path).read_text(encoding="utf-8")
+        self.task_type = str(config.get("task_type", config.get("data", {}).get("task_type", "sentiment"))).lower()
+        self.prompt_template = Path(self._resolve_prompt_path(prompt_path)).read_text(encoding="utf-8")
         self.llm = LLMClient(config)
+
+    def _resolve_prompt_path(self, default_path: str) -> str:
+        if self.task_type == "nli":
+            candidate = Path(default_path).with_name("generator_nli_prompt.txt")
+            if candidate.exists():
+                return str(candidate)
+        return default_path
 
     async def generate(
         self,
@@ -45,7 +53,7 @@ class GeneratorAgent:
     ) -> list[dict[str, str]]:
         num_candidates = int(self.config["augmentation"]["num_candidates"])
         if not self.llm.enabled:
-            raise RuntimeError("Generator LLM is disabled; rule fallback is not allowed for this run")
+            return self._rule_candidates(sample["text"], target_label, num_candidates)
 
         prompt = self.prompt_template.format(
             id=sample["id"],
@@ -62,6 +70,8 @@ class GeneratorAgent:
             raise RuntimeError(f"Generator LLM call failed; rule fallback is disabled: {exc}") from exc
 
     def _rule_candidates(self, text: str, target_label: int, n: int) -> list[dict[str, str]]:
+        if self.task_type == "nli":
+            return self._nli_rule_candidates(text, target_label, n)
         mapping = POS_TO_NEG if target_label == 0 else NEG_TO_POS
         outputs = []
         for i in range(n):
@@ -72,6 +82,54 @@ class GeneratorAgent:
                 changed = f"{text} but it feels {'worse' if target_label == 0 else 'better'} overall."
             outputs.append({"candidate_id": f"c{i+1}", "text": changed})
         return outputs
+
+    def _nli_rule_candidates(self, text: str, target_label: int, n: int) -> list[dict[str, str]]:
+        premise, hypothesis = self._split_nli_pair(text)
+        outputs: list[dict[str, str]] = []
+        for i in range(n):
+            if target_label == 1:
+                candidate_hypothesis = self._make_entailment_hypothesis(premise, hypothesis, i)
+            else:
+                candidate_hypothesis = self._make_non_entailment_hypothesis(premise, hypothesis, i)
+            outputs.append(
+                {
+                    "candidate_id": f"c{i+1}",
+                    "text": f"Premise: {premise}\nHypothesis: {candidate_hypothesis}",
+                }
+            )
+        return outputs
+
+    @staticmethod
+    def _split_nli_pair(text: str) -> tuple[str, str]:
+        premise = text
+        hypothesis = text
+        if "Premise:" in text and "Hypothesis:" in text:
+            premise_part, hypothesis_part = text.split("Hypothesis:", 1)
+            premise = premise_part.split("Premise:", 1)[-1].strip()
+            hypothesis = hypothesis_part.strip()
+        return premise.strip(), hypothesis.strip()
+
+    @staticmethod
+    def _make_entailment_hypothesis(premise: str, hypothesis: str, idx: int) -> str:
+        premise_sentences = [part.strip() for part in premise.split(".") if part.strip()]
+        if premise_sentences:
+            base = premise_sentences[min(idx, len(premise_sentences) - 1)]
+            return base if base.endswith(".") else f"{base}."
+        if hypothesis.strip():
+            return hypothesis.strip() if hypothesis.strip().endswith(".") else f"{hypothesis.strip()}."
+        return "This hypothesis is supported by the premise."
+
+    @staticmethod
+    def _make_non_entailment_hypothesis(premise: str, hypothesis: str, idx: int) -> str:
+        templates = [
+            "The premise does not guarantee this statement.",
+            "This claim introduces information not stated in the premise.",
+            "The premise fails to support this hypothesis.",
+        ]
+        base = templates[idx % len(templates)]
+        if hypothesis.strip():
+            return f"{base} {hypothesis.strip()}"
+        return base
 
     @staticmethod
     def _normalize_candidates(payload: dict[str, Any]) -> list[dict[str, str]]:

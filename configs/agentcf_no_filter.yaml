@@ -1,0 +1,25 @@
+extends: agentcf.yaml
+methods:
+  - AgentCF (Ours)
+augmentation:
+  max_retry_rounds: 0
+thresholds:
+  label_score: 0.0
+  semantic_score: 0.0
+  minimality_score: 0.0
+  final_score: 0.0
+  general_sentiment_score: 0.0
+  domain_invariant_score: 0.0
+  consistency_score: 0.0
+  style_robustness_score: 0.0
+  selector_ood_score: 0.0
+  filtering_mode: fixed
+  percentile_keep: 1.0
+verification:
+  ood_mode: false
+  use_wasserstein: false
+ood_mode: false
+ablation:
+  w_o_selector: true
+  w_o_verifier_feedback: true
+output_root: outputs/ood_agentcf_no_filter_v1

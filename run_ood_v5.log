@@ -1,0 +1,247 @@
+nohup: ignoring input
+`trust_remote_code` is not supported anymore.
+Please check that the Hugging Face dataset 'glue' isn't based on a loading script and remove `trust_remote_code`.
+If the dataset is based on a loading script, please ask the dataset author to remove it and convert it to a standard format like Parquet.
+'[Errno 101] Network is unreachable' thrown while requesting HEAD https://huggingface.co/datasets/glue/resolve/bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c/glue.py
+Retrying in 1s [Retry 1/5].
+Using the latest cached version of the dataset since glue couldn't be found on the Hugging Face Hub
+Found the latest cached dataset configuration 'sst2' at /root/.cache/huggingface/datasets/glue/sst2/0.0.0/bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c (last modified on Tue Apr 14 18:06:26 2026).
+`trust_remote_code` is not supported anymore.
+Please check that the Hugging Face dataset 'imdb' isn't based on a loading script and remove `trust_remote_code`.
+If the dataset is based on a loading script, please ask the dataset author to remove it and convert it to a standard format like Parquet.
+'[Errno 101] Network is unreachable' thrown while requesting HEAD https://huggingface.co/datasets/imdb/resolve/e6281661ce1c48d982bc483cf8a173c1bbeb5d31/imdb.py
+Retrying in 1s [Retry 1/5].
+Using the latest cached version of the dataset since imdb couldn't be found on the Hugging Face Hub
+Found the latest cached dataset configuration 'plain_text' at /root/.cache/huggingface/datasets/imdb/plain_text/0.0.0/e6281661ce1c48d982bc483cf8a173c1bbeb5d31 (last modified on Wed May  6 20:25:04 2026).
+Loading weights:   0%|          | 0/100 [00:00<?, ?it/s]Loading weights: 100%|██████████| 100/100 [00:00<00:00, 8642.70it/s]
+[transformers] [1mDistilBertForSequenceClassification LOAD REPORT[0m from: distilbert-base-uncased
+Key                     | Status     | 
+------------------------+------------+-
+vocab_projector.bias    | UNEXPECTED | 
+vocab_transform.weight  | UNEXPECTED | 
+vocab_layer_norm.bias   | UNEXPECTED | 
+vocab_layer_norm.weight | UNEXPECTED | 
+vocab_transform.bias    | UNEXPECTED | 
+pre_classifier.weight   | MISSING    | 
+classifier.weight       | MISSING    | 
+classifier.bias         | MISSING    | 
+pre_classifier.bias     | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Map:   0%|          | 0/1000 [00:00<?, ? examples/s]Map: 100%|██████████| 1000/1000 [00:00<00:00, 49205.24 examples/s]
+Map:   0%|          | 0/872 [00:00<?, ? examples/s]Map: 100%|██████████| 872/872 [00:00<00:00, 37646.50 examples/s]
+  0%|          | 0/126 [00:00<?, ?it/s]  1%|          | 1/126 [00:00<00:57,  2.18it/s]  6%|▋         | 8/126 [00:00<00:06, 17.82it/s] 10%|█         | 13/126 [00:00<00:04, 24.50it/s] 13%|█▎        | 17/126 [00:00<00:03, 27.67it/s]                                                 16%|█▌        | 20/126 [00:00<00:03, 27.67it/s] 17%|█▋        | 21/126 [00:00<00:03, 28.59it/s] 20%|█▉        | 25/126 [00:01<00:03, 30.96it/s] 23%|██▎       | 29/126 [00:01<00:03, 32.16it/s] 26%|██▌       | 33/126 [00:01<00:02, 32.89it/s] 30%|███       | 38/126 [00:01<00:02, 35.52it/s]                                                 32%|███▏      | 40/126 [00:01<00:02, 35.52it/s] 33%|███▎      | 42/126 [00:01<00:02, 36.19it/s] 37%|███▋      | 46/126 [00:01<00:02, 35.87it/s] 40%|███▉      | 50/126 [00:01<00:02, 35.18it/s] 43%|████▎     | 54/126 [00:01<00:02, 34.51it/s] 46%|████▌     | 58/126 [00:01<00:01, 34.06it/s]                                                 48%|████▊     | 60/126 [00:02<00:01, 34.06it/s] 49%|████▉     | 62/126 [00:02<00:01, 33.48it/s]{'loss': '0.6905', 'grad_norm': '1.151', 'learning_rate': '1.698e-05', 'epoch': '0.3175'}
+{'loss': '0.6625', 'grad_norm': '3.631', 'learning_rate': '1.381e-05', 'epoch': '0.6349'}
+{'loss': '0.5871', 'grad_norm': '3.631', 'learning_rate': '1.063e-05', 'epoch': '0.9524'}
+
+  0%|          | 0/55 [00:00<?, ?it/s][A
+ 29%|██▉       | 16/55 [00:00<00:00, 156.59it/s][A
+ 67%|██████▋   | 37/55 [00:00<00:00, 187.19it/s][A                                                
+                                                [A 50%|█████     | 63/126 [00:02<00:01, 33.48it/s]
+100%|██████████| 55/55 [00:00<00:00, 187.19it/s][A
+                                                [A 52%|█████▏    | 66/126 [00:02<00:03, 19.78it/s] 56%|█████▋    | 71/126 [00:02<00:02, 24.95it/s] 60%|█████▉    | 75/126 [00:02<00:01, 27.80it/s] 63%|██████▎   | 79/126 [00:02<00:01, 29.92it/s]                                                 63%|██████▎   | 80/126 [00:02<00:01, 29.92it/s] 66%|██████▌   | 83/126 [00:02<00:01, 31.80it/s] 69%|██████▉   | 87/126 [00:03<00:01, 32.83it/s] 72%|███████▏  | 91/126 [00:03<00:01, 32.83it/s] 75%|███████▌  | 95/126 [00:03<00:00, 33.01it/s] 79%|███████▊  | 99/126 [00:03<00:00, 33.15it/s]                                                 79%|███████▉  | 100/126 [00:03<00:00, 33.15it/s] 82%|████████▏ | 103/126 [00:03<00:00, 33.28it/s] 85%|████████▍ | 107/126 [00:03<00:00, 33.46it/s] 88%|████████▊ | 111/126 [00:03<00:00, 33.66it/s] 91%|█████████▏| 115/126 [00:03<00:00, 33.62it/s] 94%|█████████▍| 119/126 [00:03<00:00, 33.55it/s]                                                  95%|█████████▌| 120/126 [00:04<00:00, 33.55it/s] 98%|█████████▊| 123/126 [00:04<00:00, 33.22it/s]{'eval_loss': '0.5125', 'eval_accuracy': '0.8131', 'eval_macro_f1': '0.8121', 'eval_runtime': '0.3088', 'eval_samples_per_second': '2824', 'eval_steps_per_second': '178.1', 'epoch': '1'}
+{'loss': '0.3984', 'grad_norm': '3.228', 'learning_rate': '7.46e-06', 'epoch': '1.27'}
+{'loss': '0.353', 'grad_norm': '4.434', 'learning_rate': '4.286e-06', 'epoch': '1.587'}
+{'loss': '0.2953', 'grad_norm': '2.58', 'learning_rate': '1.111e-06', 'epoch': '1.905'}
+
+  0%|          | 0/55 [00:00<?, ?it/s][A
+ 29%|██▉       | 16/55 [00:00<00:00, 155.94it/s][A
+ 67%|██████▋   | 37/55 [00:00<00:00, 183.04it/s][A                                                 
+                                                [A100%|██████████| 126/126 [00:04<00:00, 33.22it/s]
+100%|██████████| 55/55 [00:00<00:00, 183.04it/s][A
+                                                [A                                                 100%|██████████| 126/126 [00:04<00:00, 33.22it/s]100%|██████████| 126/126 [00:04<00:00, 28.03it/s]
+{'eval_loss': '0.391', 'eval_accuracy': '0.8314', 'eval_macro_f1': '0.8314', 'eval_runtime': '0.3079', 'eval_samples_per_second': '2832', 'eval_steps_per_second': '178.6', 'epoch': '2'}
+{'train_runtime': '4.496', 'train_samples_per_second': '444.9', 'train_steps_per_second': '28.03', 'train_loss': '0.4928', 'epoch': '2'}
+  0%|          | 0/55 [00:00<?, ?it/s] 38%|███▊      | 21/55 [00:00<00:00, 207.03it/s] 78%|███████▊  | 43/55 [00:00<00:00, 209.18it/s]100%|██████████| 55/55 [00:00<00:00, 208.58it/s]
+Map:   0%|          | 0/872 [00:00<?, ? examples/s]Map: 100%|██████████| 872/872 [00:00<00:00, 33631.88 examples/s]
+  0%|          | 0/55 [00:00<?, ?it/s] 38%|███▊      | 21/55 [00:00<00:00, 203.34it/s] 80%|████████  | 44/55 [00:00<00:00, 214.08it/s]100%|██████████| 55/55 [00:00<00:00, 213.70it/s]
+Map:   0%|          | 0/25000 [00:00<?, ? examples/s]Map:   4%|▍         | 1000/25000 [00:00<00:04, 5646.23 examples/s]Map:   8%|▊         | 2000/25000 [00:00<00:03, 6436.64 examples/s]Map:  12%|█▏        | 3000/25000 [00:00<00:03, 6988.78 examples/s]Map:  16%|█▌        | 4000/25000 [00:00<00:02, 7477.49 examples/s]Map:  20%|██        | 5000/25000 [00:00<00:02, 7544.76 examples/s]Map:  24%|██▍       | 6000/25000 [00:00<00:02, 7533.29 examples/s]Map:  28%|██▊       | 7000/25000 [00:00<00:02, 7759.74 examples/s]Map:  32%|███▏      | 8000/25000 [00:01<00:02, 7684.19 examples/s]Map:  36%|███▌      | 9000/25000 [00:01<00:02, 7732.00 examples/s]Map:  40%|████      | 10000/25000 [00:01<00:01, 7767.93 examples/s]Map:  44%|████▍     | 11000/25000 [00:01<00:01, 7672.60 examples/s]Map:  48%|████▊     | 12000/25000 [00:01<00:01, 7820.54 examples/s]Map:  52%|█████▏    | 13000/25000 [00:01<00:01, 7914.46 examples/s]Map:  56%|█████▌    | 14000/25000 [00:01<00:01, 7977.56 examples/s]Map:  60%|██████    | 15000/25000 [00:01<00:01, 7755.35 examples/s]Map:  64%|██████▍   | 16000/25000 [00:02<00:01, 7796.99 examples/s]Map:  68%|██████▊   | 17000/25000 [00:02<00:01, 7850.53 examples/s]Map:  72%|███████▏  | 18000/25000 [00:02<00:01, 5126.26 examples/s]Map:  76%|███████▌  | 19000/25000 [00:02<00:01, 5880.55 examples/s]Map:  80%|████████  | 20000/25000 [00:02<00:00, 6440.79 examples/s]Map:  84%|████████▍ | 21000/25000 [00:02<00:00, 7013.94 examples/s]Map:  88%|████████▊ | 22000/25000 [00:03<00:00, 7458.09 examples/s]Map:  92%|█████████▏| 23000/25000 [00:03<00:00, 7535.67 examples/s]Map:  96%|█████████▌| 24000/25000 [00:03<00:00, 8033.59 examples/s]Map: 100%|██████████| 25000/25000 [00:03<00:00, 8072.78 examples/s]Map: 100%|██████████| 25000/25000 [00:03<00:00, 7346.57 examples/s]
+  0%|          | 0/1563 [00:00<?, ?it/s]  1%|          | 13/1563 [00:00<00:12, 122.23it/s]  2%|▏         | 27/1563 [00:00<00:11, 128.97it/s]  3%|▎         | 41/1563 [00:00<00:11, 130.22it/s]  4%|▎         | 55/1563 [00:00<00:11, 129.76it/s]  4%|▍         | 69/1563 [00:00<00:11, 130.47it/s]  5%|▌         | 83/1563 [00:00<00:11, 131.34it/s]  6%|▌         | 97/1563 [00:00<00:11, 131.86it/s]  7%|▋         | 111/1563 [00:00<00:11, 131.85it/s]  8%|▊         | 125/1563 [00:00<00:10, 132.15it/s]  9%|▉         | 139/1563 [00:01<00:10, 132.32it/s] 10%|▉         | 153/1563 [00:01<00:10, 132.05it/s] 11%|█         | 167/1563 [00:01<00:10, 132.37it/s] 12%|█▏        | 181/1563 [00:01<00:10, 132.42it/s] 12%|█▏        | 195/1563 [00:01<00:10, 132.38it/s] 13%|█▎        | 209/1563 [00:01<00:10, 132.47it/s] 14%|█▍        | 223/1563 [00:01<00:10, 131.62it/s] 15%|█▌        | 237/1563 [00:01<00:10, 132.21it/s] 16%|█▌        | 251/1563 [00:01<00:09, 131.74it/s] 17%|█▋        | 265/1563 [00:02<00:09, 131.77it/s] 18%|█▊        | 279/1563 [00:02<00:09, 131.92it/s] 19%|█▊        | 293/1563 [00:02<00:09, 131.86it/s] 20%|█▉        | 307/1563 [00:02<00:09, 132.41it/s] 21%|██        | 321/1563 [00:02<00:09, 132.56it/s] 21%|██▏       | 335/1563 [00:02<00:09, 132.16it/s] 22%|██▏       | 349/1563 [00:02<00:09, 130.57it/s] 23%|██▎       | 363/1563 [00:02<00:09, 129.51it/s] 24%|██▍       | 377/1563 [00:02<00:09, 129.78it/s] 25%|██▌       | 391/1563 [00:02<00:08, 130.56it/s] 26%|██▌       | 405/1563 [00:03<00:08, 131.00it/s] 27%|██▋       | 419/1563 [00:03<00:08, 130.68it/s] 28%|██▊       | 433/1563 [00:03<00:08, 131.52it/s] 29%|██▊       | 447/1563 [00:03<00:08, 131.63it/s] 29%|██▉       | 461/1563 [00:03<00:08, 131.63it/s] 30%|███       | 475/1563 [00:03<00:08, 131.87it/s] 31%|███▏      | 489/1563 [00:03<00:08, 130.73it/s] 32%|███▏      | 503/1563 [00:03<00:08, 131.04it/s] 33%|███▎      | 517/1563 [00:03<00:07, 131.70it/s] 34%|███▍      | 531/1563 [00:04<00:07, 130.59it/s] 35%|███▍      | 545/1563 [00:04<00:07, 131.28it/s] 36%|███▌      | 559/1563 [00:04<00:07, 130.54it/s] 37%|███▋      | 573/1563 [00:04<00:07, 131.03it/s] 38%|███▊      | 587/1563 [00:04<00:07, 131.01it/s] 38%|███▊      | 601/1563 [00:04<00:07, 131.45it/s] 39%|███▉      | 615/1563 [00:04<00:07, 131.05it/s] 40%|████      | 629/1563 [00:04<00:07, 131.57it/s] 41%|████      | 643/1563 [00:04<00:06, 131.92it/s] 42%|████▏     | 657/1563 [00:05<00:06, 131.82it/s] 43%|████▎     | 671/1563 [00:05<00:06, 130.52it/s] 44%|████▍     | 685/1563 [00:05<00:06, 130.65it/s] 45%|████▍     | 699/1563 [00:05<00:06, 131.62it/s] 46%|████▌     | 713/1563 [00:05<00:06, 131.96it/s] 47%|████▋     | 727/1563 [00:05<00:06, 129.51it/s] 47%|████▋     | 741/1563 [00:05<00:06, 130.05it/s] 48%|████▊     | 755/1563 [00:05<00:06, 130.98it/s] 49%|████▉     | 769/1563 [00:05<00:06, 130.84it/s] 50%|█████     | 783/1563 [00:05<00:05, 131.29it/s] 51%|█████     | 797/1563 [00:06<00:05, 130.70it/s] 52%|█████▏    | 811/1563 [00:06<00:05, 131.27it/s] 53%|█████▎    | 825/1563 [00:06<00:05, 130.59it/s] 54%|█████▎    | 839/1563 [00:06<00:05, 131.09it/s] 55%|█████▍    | 853/1563 [00:06<00:05, 131.33it/s] 55%|█████▌    | 867/1563 [00:06<00:05, 130.28it/s] 56%|█████▋    | 881/1563 [00:06<00:05, 130.91it/s] 57%|█████▋    | 895/1563 [00:06<00:05, 130.71it/s] 58%|█████▊    | 909/1563 [00:06<00:04, 131.36it/s] 59%|█████▉    | 923/1563 [00:07<00:04, 131.74it/s] 60%|█████▉    | 937/1563 [00:07<00:04, 130.81it/s] 61%|██████    | 951/1563 [00:07<00:04, 131.44it/s] 62%|██████▏   | 965/1563 [00:07<00:04, 131.18it/s] 63%|██████▎   | 979/1563 [00:07<00:04, 130.98it/s] 64%|██████▎   | 993/1563 [00:07<00:04, 131.48it/s] 64%|██████▍   | 1007/1563 [00:07<00:04, 131.66it/s] 65%|██████▌   | 1021/1563 [00:07<00:04, 131.59it/s] 66%|██████▌   | 1035/1563 [00:07<00:04, 131.99it/s] 67%|██████▋   | 1049/1563 [00:07<00:03, 131.68it/s] 68%|██████▊   | 1063/1563 [00:08<00:03, 131.78it/s] 69%|██████▉   | 1077/1563 [00:08<00:03, 130.66it/s] 70%|██████▉   | 1091/1563 [00:08<00:03, 130.99it/s] 71%|███████   | 1105/1563 [00:08<00:03, 128.77it/s] 72%|███████▏  | 1119/1563 [00:08<00:03, 130.11it/s] 72%|███████▏  | 1133/1563 [00:08<00:03, 130.69it/s] 73%|███████▎  | 1147/1563 [00:08<00:03, 130.14it/s] 74%|███████▍  | 1161/1563 [00:08<00:03, 130.44it/s] 75%|███████▌  | 1175/1563 [00:08<00:02, 130.48it/s] 76%|███████▌  | 1189/1563 [00:09<00:02, 130.82it/s] 77%|███████▋  | 1203/1563 [00:09<00:02, 131.41it/s] 78%|███████▊  | 1217/1563 [00:09<00:02, 131.31it/s] 79%|███████▉  | 1231/1563 [00:09<00:02, 131.60it/s] 80%|███████▉  | 1245/1563 [00:09<00:02, 131.67it/s] 81%|████████  | 1259/1563 [00:09<00:02, 130.63it/s] 81%|████████▏ | 1273/1563 [00:09<00:02, 129.54it/s] 82%|████████▏ | 1286/1563 [00:09<00:02, 128.49it/s] 83%|████████▎ | 1299/1563 [00:09<00:02, 128.72it/s] 84%|████████▍ | 1313/1563 [00:10<00:01, 129.70it/s] 85%|████████▍ | 1326/1563 [00:10<00:01, 129.63it/s] 86%|████████▌ | 1340/1563 [00:10<00:01, 130.51it/s] 87%|████████▋ | 1354/1563 [00:10<00:01, 131.25it/s] 88%|████████▊ | 1368/1563 [00:10<00:01, 130.43it/s] 88%|████████▊ | 1382/1563 [00:10<00:01, 130.61it/s] 89%|████████▉ | 1396/1563 [00:10<00:01, 130.89it/s] 90%|█████████ | 1410/1563 [00:10<00:01, 131.43it/s] 91%|█████████ | 1424/1563 [00:10<00:01, 131.77it/s] 92%|█████████▏| 1438/1563 [00:10<00:00, 131.94it/s] 93%|█████████▎| 1452/1563 [00:11<00:00, 132.00it/s] 94%|█████████▍| 1466/1563 [00:11<00:00, 131.73it/s] 95%|█████████▍| 1480/1563 [00:11<00:00, 131.51it/s] 96%|█████████▌| 1494/1563 [00:11<00:00, 131.53it/s] 96%|█████████▋| 1508/1563 [00:11<00:00, 131.84it/s] 97%|█████████▋| 1522/1563 [00:11<00:00, 131.72it/s] 98%|█████████▊| 1536/1563 [00:11<00:00, 131.69it/s] 99%|█████████▉| 1550/1563 [00:11<00:00, 131.53it/s]100%|██████████| 1563/1563 [00:11<00:00, 131.07it/s]
+Loading weights:   0%|          | 0/100 [00:00<?, ?it/s]Loading weights: 100%|██████████| 100/100 [00:00<00:00, 8288.81it/s]
+[transformers] [1mDistilBertForSequenceClassification LOAD REPORT[0m from: distilbert-base-uncased
+Key                     | Status     | 
+------------------------+------------+-
+vocab_projector.bias    | UNEXPECTED | 
+vocab_transform.weight  | UNEXPECTED | 
+vocab_layer_norm.bias   | UNEXPECTED | 
+vocab_layer_norm.weight | UNEXPECTED | 
+vocab_transform.bias    | UNEXPECTED | 
+pre_classifier.weight   | MISSING    | 
+classifier.weight       | MISSING    | 
+classifier.bias         | MISSING    | 
+pre_classifier.bias     | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Map:   0%|          | 0/1500 [00:00<?, ? examples/s]Map: 100%|██████████| 1500/1500 [00:00<00:00, 55501.75 examples/s]
+Map:   0%|          | 0/872 [00:00<?, ? examples/s]Map: 100%|██████████| 872/872 [00:00<00:00, 35400.11 examples/s]
+  0%|          | 0/188 [00:00<?, ?it/s]  3%|▎         | 5/188 [00:00<00:04, 44.38it/s]  5%|▌         | 10/188 [00:00<00:04, 42.55it/s]  8%|▊         | 15/188 [00:00<00:04, 40.51it/s] 11%|█         | 20/188 [00:00<00:04, 38.64it/s]                                                 11%|█         | 20/188 [00:00<00:04, 38.64it/s] 13%|█▎        | 24/188 [00:00<00:04, 37.18it/s] 15%|█▍        | 28/188 [00:00<00:04, 35.09it/s] 17%|█▋        | 32/188 [00:00<00:04, 34.80it/s] 19%|█▉        | 36/188 [00:00<00:04, 34.45it/s] 21%|██▏       | 40/188 [00:01<00:04, 33.31it/s]                                                 21%|██▏       | 40/188 [00:01<00:04, 33.31it/s] 23%|██▎       | 44/188 [00:01<00:04, 33.22it/s] 26%|██▌       | 48/188 [00:01<00:04, 33.28it/s] 28%|██▊       | 52/188 [00:01<00:04, 33.52it/s] 30%|██▉       | 56/188 [00:01<00:03, 33.59it/s] 32%|███▏      | 60/188 [00:01<00:03, 33.67it/s]                                                 32%|███▏      | 60/188 [00:01<00:03, 33.67it/s] 34%|███▍      | 64/188 [00:01<00:03, 33.55it/s] 36%|███▌      | 68/188 [00:01<00:03, 33.27it/s] 38%|███▊      | 72/188 [00:02<00:03, 33.38it/s] 40%|████      | 76/188 [00:02<00:03, 33.25it/s] 43%|████▎     | 80/188 [00:02<00:03, 33.60it/s]                                                 43%|████▎     | 80/188 [00:02<00:03, 33.60it/s] 45%|████▍     | 84/188 [00:02<00:03, 33.49it/s] 47%|████▋     | 88/188 [00:02<00:02, 33.58it/s] 49%|████▉     | 92/188 [00:02<00:02, 33.00it/s]{'loss': '0.6841', 'grad_norm': '1.594', 'learning_rate': '1.798e-05', 'epoch': '0.2128'}
+{'loss': '0.5616', 'grad_norm': '3.841', 'learning_rate': '1.585e-05', 'epoch': '0.4255'}
+{'loss': '0.3993', 'grad_norm': '8.924', 'learning_rate': '1.372e-05', 'epoch': '0.6383'}
+{'loss': '0.329', 'grad_norm': '18.74', 'learning_rate': '1.16e-05', 'epoch': '0.8511'}
+
+  0%|          | 0/55 [00:00<?, ?it/s][A
+ 29%|██▉       | 16/55 [00:00<00:00, 156.21it/s][A
+ 67%|██████▋   | 37/55 [00:00<00:00, 186.06it/s][A                                                
+                                                [A 50%|█████     | 94/188 [00:03<00:02, 33.00it/s]
+100%|██████████| 55/55 [00:00<00:00, 186.06it/s][A
+                                                [A 51%|█████     | 96/188 [00:03<00:04, 19.00it/s]                                                 53%|█████▎    | 100/188 [00:03<00:04, 19.00it/s] 54%|█████▎    | 101/188 [00:03<00:03, 24.19it/s] 56%|█████▋    | 106/188 [00:03<00:02, 28.12it/s] 59%|█████▊    | 110/188 [00:03<00:02, 27.09it/s] 62%|██████▏   | 116/188 [00:03<00:02, 32.69it/s]                                                  64%|██████▍   | 120/188 [00:03<00:02, 32.69it/s] 64%|██████▍   | 121/188 [00:03<00:01, 35.68it/s] 67%|██████▋   | 126/188 [00:03<00:01, 36.70it/s] 69%|██████▉   | 130/188 [00:03<00:01, 36.69it/s] 71%|███████▏  | 134/188 [00:04<00:01, 35.83it/s] 73%|███████▎  | 138/188 [00:04<00:01, 34.95it/s]                                                  74%|███████▍  | 140/188 [00:04<00:01, 34.95it/s] 76%|███████▌  | 142/188 [00:04<00:01, 34.29it/s] 78%|███████▊  | 146/188 [00:04<00:01, 33.94it/s] 80%|███████▉  | 150/188 [00:04<00:01, 33.82it/s] 82%|████████▏ | 154/188 [00:04<00:01, 33.26it/s] 84%|████████▍ | 158/188 [00:04<00:00, 33.33it/s]                                                  85%|████████▌ | 160/188 [00:04<00:00, 33.33it/s] 86%|████████▌ | 162/188 [00:04<00:00, 33.40it/s] 88%|████████▊ | 166/188 [00:05<00:00, 33.46it/s] 90%|█████████ | 170/188 [00:05<00:00, 33.37it/s] 93%|█████████▎| 174/188 [00:05<00:00, 33.40it/s] 95%|█████████▍| 178/188 [00:05<00:00, 32.96it/s]                                                  96%|█████████▌| 180/188 [00:05<00:00, 32.96it/s] 97%|█████████▋| 182/188 [00:05<00:00, 33.20it/s] 99%|█████████▉| 186/188 [00:05<00:00, 33.37it/s]{'eval_loss': '0.3733', 'eval_accuracy': '0.8383', 'eval_macro_f1': '0.8382', 'eval_runtime': '0.3075', 'eval_samples_per_second': '2836', 'eval_steps_per_second': '178.9', 'epoch': '1'}
+{'loss': '0.2677', 'grad_norm': '2.878', 'learning_rate': '9.468e-06', 'epoch': '1.064'}
+{'loss': '0.1851', 'grad_norm': '1.524', 'learning_rate': '7.34e-06', 'epoch': '1.277'}
+{'loss': '0.1735', 'grad_norm': '11.26', 'learning_rate': '5.213e-06', 'epoch': '1.489'}
+{'loss': '0.1944', 'grad_norm': '11.34', 'learning_rate': '3.085e-06', 'epoch': '1.702'}
+{'loss': '0.1682', 'grad_norm': '7.001', 'learning_rate': '9.574e-07', 'epoch': '1.915'}
+
+  0%|          | 0/55 [00:00<?, ?it/s][A
+ 27%|██▋       | 15/55 [00:00<00:00, 148.71it/s][A
+ 65%|██████▌   | 36/55 [00:00<00:00, 183.15it/s][A                                                 
+                                                [A100%|██████████| 188/188 [00:05<00:00, 33.37it/s]
+100%|██████████| 55/55 [00:00<00:00, 183.15it/s][A
+                                                [A                                                 100%|██████████| 188/188 [00:05<00:00, 33.37it/s]100%|██████████| 188/188 [00:05<00:00, 31.34it/s]
+{'eval_loss': '0.3927', 'eval_accuracy': '0.8417', 'eval_macro_f1': '0.8416', 'eval_runtime': '0.3103', 'eval_samples_per_second': '2810', 'eval_steps_per_second': '177.2', 'epoch': '2'}
+{'train_runtime': '6', 'train_samples_per_second': '500', 'train_steps_per_second': '31.34', 'train_loss': '0.3223', 'epoch': '2'}
+  0%|          | 0/55 [00:00<?, ?it/s] 40%|████      | 22/55 [00:00<00:00, 213.26it/s] 80%|████████  | 44/55 [00:00<00:00, 210.03it/s]100%|██████████| 55/55 [00:00<00:00, 209.67it/s]
+Map:   0%|          | 0/872 [00:00<?, ? examples/s]Map: 100%|██████████| 872/872 [00:00<00:00, 34538.95 examples/s]
+  0%|          | 0/55 [00:00<?, ?it/s] 35%|███▍      | 19/55 [00:00<00:00, 189.81it/s] 76%|███████▋  | 42/55 [00:00<00:00, 209.52it/s]100%|██████████| 55/55 [00:00<00:00, 209.24it/s]
+Map:   0%|          | 0/25000 [00:00<?, ? examples/s]Map:   4%|▍         | 1000/25000 [00:00<00:03, 6250.94 examples/s]Map:   8%|▊         | 2000/25000 [00:00<00:03, 7475.81 examples/s]Map:  12%|█▏        | 3000/25000 [00:00<00:02, 7954.22 examples/s]Map:  16%|█▌        | 4000/25000 [00:00<00:02, 8590.67 examples/s]Map:  20%|██        | 5000/25000 [00:00<00:02, 8804.01 examples/s]Map:  24%|██▍       | 6000/25000 [00:00<00:02, 8850.72 examples/s]Map:  32%|███▏      | 8000/25000 [00:00<00:01, 9234.04 examples/s]Map:  36%|███▌      | 9000/25000 [00:01<00:01, 9400.97 examples/s]Map:  40%|████      | 10000/25000 [00:01<00:01, 9031.65 examples/s]Map:  44%|████▍     | 11000/25000 [00:01<00:01, 8552.24 examples/s]Map:  48%|████▊     | 12000/25000 [00:01<00:01, 8423.86 examples/s]Map:  52%|█████▏    | 13000/25000 [00:01<00:01, 8690.69 examples/s]Map:  56%|█████▌    | 14000/25000 [00:01<00:01, 8724.78 examples/s]Map:  60%|██████    | 15000/25000 [00:01<00:01, 8981.71 examples/s]Map:  64%|██████▍   | 16000/25000 [00:01<00:01, 8915.61 examples/s]Map:  68%|██████▊   | 17000/25000 [00:01<00:00, 8758.46 examples/s]Map:  72%|███████▏  | 18000/25000 [00:02<00:01, 5542.22 examples/s]Map:  76%|███████▌  | 19000/25000 [00:02<00:00, 6256.64 examples/s]Map:  80%|████████  | 20000/25000 [00:02<00:00, 6894.78 examples/s]Map:  84%|████████▍ | 21000/25000 [00:02<00:00, 7506.14 examples/s]Map:  88%|████████▊ | 22000/25000 [00:02<00:00, 7870.14 examples/s]Map:  92%|█████████▏| 23000/25000 [00:02<00:00, 7959.35 examples/s]Map:  96%|█████████▌| 24000/25000 [00:02<00:00, 8101.36 examples/s]Map: 100%|██████████| 25000/25000 [00:03<00:00, 8377.12 examples/s]Map: 100%|██████████| 25000/25000 [00:03<00:00, 8095.11 examples/s]
+  0%|          | 0/1563 [00:00<?, ?it/s]  1%|          | 13/1563 [00:00<00:12, 126.71it/s]  2%|▏         | 27/1563 [00:00<00:11, 131.12it/s]  3%|▎         | 41/1563 [00:00<00:11, 132.03it/s]  4%|▎         | 55/1563 [00:00<00:11, 132.36it/s]  4%|▍         | 69/1563 [00:00<00:11, 132.27it/s]  5%|▌         | 83/1563 [00:00<00:11, 132.41it/s]  6%|▌         | 97/1563 [00:00<00:11, 132.65it/s]  7%|▋         | 111/1563 [00:00<00:10, 132.54it/s]  8%|▊         | 125/1563 [00:00<00:10, 132.54it/s]  9%|▉         | 139/1563 [00:01<00:10, 132.52it/s] 10%|▉         | 153/1563 [00:01<00:10, 132.60it/s] 11%|█         | 167/1563 [00:01<00:10, 132.73it/s] 12%|█▏        | 181/1563 [00:01<00:10, 132.60it/s] 12%|█▏        | 195/1563 [00:01<00:10, 132.44it/s] 13%|█▎        | 209/1563 [00:01<00:10, 131.95it/s] 14%|█▍        | 223/1563 [00:01<00:10, 131.01it/s] 15%|█▌        | 237/1563 [00:01<00:10, 131.78it/s] 16%|█▌        | 251/1563 [00:01<00:09, 132.12it/s] 17%|█▋        | 265/1563 [00:02<00:09, 132.63it/s] 18%|█▊        | 279/1563 [00:02<00:09, 132.46it/s] 19%|█▊        | 293/1563 [00:02<00:09, 132.21it/s] 20%|█▉        | 307/1563 [00:02<00:09, 132.69it/s] 21%|██        | 321/1563 [00:02<00:09, 132.70it/s] 21%|██▏       | 335/1563 [00:02<00:09, 132.81it/s] 22%|██▏       | 349/1563 [00:02<00:09, 133.10it/s] 23%|██▎       | 363/1563 [00:02<00:09, 133.07it/s] 24%|██▍       | 377/1563 [00:02<00:08, 132.95it/s] 25%|██▌       | 391/1563 [00:02<00:08, 132.24it/s] 26%|██▌       | 405/1563 [00:03<00:08, 132.20it/s] 27%|██▋       | 419/1563 [00:03<00:08, 132.59it/s] 28%|██▊       | 433/1563 [00:03<00:08, 132.76it/s] 29%|██▊       | 447/1563 [00:03<00:08, 132.45it/s] 29%|██▉       | 461/1563 [00:03<00:08, 132.65it/s] 30%|███       | 475/1563 [00:03<00:08, 132.66it/s] 31%|███▏      | 489/1563 [00:03<00:08, 132.60it/s] 32%|███▏      | 503/1563 [00:03<00:08, 132.43it/s] 33%|███▎      | 517/1563 [00:03<00:07, 132.65it/s] 34%|███▍      | 531/1563 [00:04<00:07, 131.54it/s] 35%|███▍      | 545/1563 [00:04<00:07, 132.05it/s] 36%|███▌      | 559/1563 [00:04<00:07, 132.34it/s] 37%|███▋      | 573/1563 [00:04<00:07, 132.23it/s] 38%|███▊      | 587/1563 [00:04<00:07, 132.41it/s] 38%|███▊      | 601/1563 [00:04<00:07, 132.41it/s] 39%|███▉      | 615/1563 [00:04<00:07, 132.39it/s] 40%|████      | 629/1563 [00:04<00:07, 132.51it/s] 41%|████      | 643/1563 [00:04<00:06, 132.82it/s] 42%|████▏     | 657/1563 [00:04<00:06, 132.91it/s] 43%|████▎     | 671/1563 [00:05<00:06, 132.88it/s] 44%|████▍     | 685/1563 [00:05<00:06, 132.87it/s] 45%|████▍     | 699/1563 [00:05<00:06, 133.14it/s] 46%|████▌     | 713/1563 [00:05<00:06, 132.99it/s] 47%|████▋     | 727/1563 [00:05<00:06, 132.84it/s] 47%|████▋     | 741/1563 [00:05<00:06, 132.60it/s] 48%|████▊     | 755/1563 [00:05<00:06, 132.76it/s] 49%|████▉     | 769/1563 [00:05<00:05, 132.71it/s] 50%|█████     | 783/1563 [00:05<00:05, 132.62it/s] 51%|█████     | 797/1563 [00:06<00:05, 132.54it/s] 52%|█████▏    | 811/1563 [00:06<00:05, 132.64it/s] 53%|█████▎    | 825/1563 [00:06<00:05, 132.71it/s] 54%|█████▎    | 839/1563 [00:06<00:05, 132.69it/s] 55%|█████▍    | 853/1563 [00:06<00:05, 131.14it/s] 55%|█████▌    | 867/1563 [00:06<00:05, 131.47it/s] 56%|█████▋    | 881/1563 [00:06<00:05, 131.72it/s] 57%|█████▋    | 895/1563 [00:06<00:05, 132.06it/s] 58%|█████▊    | 909/1563 [00:06<00:04, 132.25it/s] 59%|█████▉    | 923/1563 [00:06<00:04, 132.36it/s] 60%|█████▉    | 937/1563 [00:07<00:04, 131.55it/s] 61%|██████    | 951/1563 [00:07<00:04, 132.08it/s] 62%|██████▏   | 965/1563 [00:07<00:04, 132.18it/s] 63%|██████▎   | 979/1563 [00:07<00:04, 132.32it/s] 64%|██████▎   | 993/1563 [00:07<00:04, 132.44it/s] 64%|██████▍   | 1007/1563 [00:07<00:04, 132.40it/s] 65%|██████▌   | 1021/1563 [00:07<00:04, 132.46it/s] 66%|██████▌   | 1035/1563 [00:07<00:03, 132.74it/s] 67%|██████▋   | 1049/1563 [00:07<00:03, 132.67it/s] 68%|██████▊   | 1063/1563 [00:08<00:03, 132.64it/s] 69%|██████▉   | 1077/1563 [00:08<00:03, 132.70it/s] 70%|██████▉   | 1091/1563 [00:08<00:03, 132.46it/s] 71%|███████   | 1105/1563 [00:08<00:03, 132.70it/s] 72%|███████▏  | 1119/1563 [00:08<00:03, 132.53it/s] 72%|███████▏  | 1133/1563 [00:08<00:03, 132.40it/s] 73%|███████▎  | 1147/1563 [00:08<00:03, 132.45it/s] 74%|███████▍  | 1161/1563 [00:08<00:03, 131.01it/s] 75%|███████▌  | 1175/1563 [00:08<00:02, 131.29it/s] 76%|███████▌  | 1189/1563 [00:08<00:02, 130.40it/s] 77%|███████▋  | 1203/1563 [00:09<00:02, 131.11it/s] 78%|███████▊  | 1217/1563 [00:09<00:02, 131.54it/s] 79%|███████▉  | 1231/1563 [00:09<00:02, 131.80it/s] 80%|███████▉  | 1245/1563 [00:09<00:02, 131.99it/s] 81%|████████  | 1259/1563 [00:09<00:02, 132.16it/s] 81%|████████▏ | 1273/1563 [00:09<00:02, 132.32it/s] 82%|████████▏ | 1287/1563 [00:09<00:02, 132.54it/s] 83%|████████▎ | 1301/1563 [00:09<00:01, 131.98it/s] 84%|████████▍ | 1315/1563 [00:09<00:01, 132.30it/s] 85%|████████▌ | 1329/1563 [00:10<00:01, 132.58it/s] 86%|████████▌ | 1343/1563 [00:10<00:01, 132.66it/s] 87%|████████▋ | 1357/1563 [00:10<00:01, 132.97it/s] 88%|████████▊ | 1371/1563 [00:10<00:01, 133.08it/s] 89%|████████▊ | 1385/1563 [00:10<00:01, 133.27it/s] 90%|████████▉ | 1399/1563 [00:10<00:01, 133.01it/s] 90%|█████████ | 1413/1563 [00:10<00:01, 133.12it/s] 91%|█████████▏| 1427/1563 [00:10<00:01, 132.96it/s] 92%|█████████▏| 1441/1563 [00:10<00:00, 132.87it/s] 93%|█████████▎| 1455/1563 [00:10<00:00, 132.72it/s] 94%|█████████▍| 1469/1563 [00:11<00:00, 132.41it/s] 95%|█████████▍| 1483/1563 [00:11<00:00, 132.44it/s] 96%|█████████▌| 1497/1563 [00:11<00:00, 132.28it/s] 97%|█████████▋| 1511/1563 [00:11<00:00, 131.63it/s] 98%|█████████▊| 1525/1563 [00:11<00:00, 131.90it/s] 98%|█████████▊| 1539/1563 [00:11<00:00, 131.93it/s] 99%|█████████▉| 1553/1563 [00:11<00:00, 132.02it/s]100%|██████████| 1563/1563 [00:11<00:00, 132.36it/s]
+Loading weights:   0%|          | 0/100 [00:00<?, ?it/s]Loading weights: 100%|██████████| 100/100 [00:00<00:00, 8517.39it/s]
+[transformers] [1mDistilBertForSequenceClassification LOAD REPORT[0m from: distilbert-base-uncased
+Key                     | Status     | 
+------------------------+------------+-
+vocab_projector.bias    | UNEXPECTED | 
+vocab_transform.weight  | UNEXPECTED | 
+vocab_layer_norm.bias   | UNEXPECTED | 
+vocab_layer_norm.weight | UNEXPECTED | 
+vocab_transform.bias    | UNEXPECTED | 
+pre_classifier.weight   | MISSING    | 
+classifier.weight       | MISSING    | 
+classifier.bias         | MISSING    | 
+pre_classifier.bias     | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Traceback (most recent call last):
+  File "/root/miniconda3/lib/python3.12/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "/root/miniconda3/lib/python3.12/site-packages/httpx/_transports/default.py", line 394, in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/httpcore/_async/connection_pool.py", line 256, in handle_async_request
+    raise exc from None
+  File "/root/miniconda3/lib/python3.12/site-packages/httpcore/_async/connection_pool.py", line 236, in handle_async_request
+    response = await connection.handle_async_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/httpcore/_async/connection.py", line 101, in handle_async_request
+    raise exc
+  File "/root/miniconda3/lib/python3.12/site-packages/httpcore/_async/connection.py", line 78, in handle_async_request
+    stream = await self._connect(request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/httpcore/_async/connection.py", line 124, in _connect
+    stream = await self._network_backend.connect_tcp(**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/httpcore/_backends/auto.py", line 31, in connect_tcp
+    return await self._backend.connect_tcp(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/httpcore/_backends/anyio.py", line 113, in connect_tcp
+    with map_exceptions(exc_map):
+  File "/root/miniconda3/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/root/miniconda3/lib/python3.12/site-packages/httpcore/_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ConnectError: All connection attempts failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/miniconda3/lib/python3.12/site-packages/openai/_base_client.py", line 1630, in request
+    response = await self._send_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/openai/_client.py", line 829, in _send_request
+    return await self._send_with_auth_retry(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/openai/_client.py", line 807, in _send_with_auth_retry
+    response = await super()._send_request(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/openai/_base_client.py", line 1553, in _send_request
+    return await self._client.send(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/httpx/_client.py", line 1629, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/httpx/_client.py", line 1657, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/httpx/_client.py", line 1694, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/httpx/_client.py", line 1730, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/httpx/_transports/default.py", line 393, in handle_async_request
+    with map_httpcore_exceptions():
+  File "/root/miniconda3/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/root/miniconda3/lib/python3.12/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ConnectError: All connection attempts failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/autodl-tmp/AgentCF-Multi-Agent-Counterfactual-Data-Augmentation/src/agents/generator.py", line 59, in generate
+    payload = await self.llm.json_completion(stage="generator", prompt=prompt, max_retries=3)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/AgentCF-Multi-Agent-Counterfactual-Data-Augmentation/src/utils/llm.py", line 254, in json_completion
+    resp = await client.chat.completions.create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 2714, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/openai/_base_client.py", line 1913, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/openai/_base_client.py", line 1665, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/root/autodl-tmp/AgentCF-Multi-Agent-Counterfactual-Data-Augmentation/src/run_ood.py", line 174, in <module>
+    main()
+  File "/root/autodl-tmp/AgentCF-Multi-Agent-Counterfactual-Data-Augmentation/src/run_ood.py", line 170, in main
+    asyncio.run(run_ood(args.config))
+  File "/root/miniconda3/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/AgentCF-Multi-Agent-Counterfactual-Data-Augmentation/src/run_ood.py", line 105, in run_ood
+    aug_df, ver_df = await build_single_cf(train_df, cfg)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/AgentCF-Multi-Agent-Counterfactual-Data-Augmentation/src/augmentation/single_cf.py", line 52, in build_single_cf
+    local_rows, local_vers = await coro
+                             ^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/asyncio/tasks.py", line 631, in _wait_for_one
+    return f.result()  # May raise f.exception().
+           ^^^^^^^^^^
+  File "/root/autodl-tmp/AgentCF-Multi-Agent-Counterfactual-Data-Augmentation/src/augmentation/single_cf.py", line 48, in _process_with_sem
+    return await _process_one(sample)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/AgentCF-Multi-Agent-Counterfactual-Data-Augmentation/src/augmentation/single_cf.py", line 24, in _process_one
+    cands = await generator.generate(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/AgentCF-Multi-Agent-Counterfactual-Data-Augmentation/src/agents/generator.py", line 62, in generate
+    raise RuntimeError(f"Generator LLM call failed; rule fallback is disabled: {exc}") from exc
+RuntimeError: Generator LLM call failed; rule fallback is disabled: Connection error.

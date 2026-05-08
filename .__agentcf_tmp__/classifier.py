@@ -37,10 +37,8 @@ class HFClassifier:
     max_length: int
 
     def __post_init__(self) -> None:
-        import os
-        os.environ.setdefault("HF_HUB_OFFLINE", "1")  # 强制模型离线模式
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, local_files_only=True)
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name, num_labels=2, local_files_only=True)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name, num_labels=2)
 
     def _to_dataset(self, df):
         cols = ["text", "label"] + (["sample_weight"] if "sample_weight" in df.columns else [])
@@ -65,7 +63,6 @@ class HFClassifier:
         val_ds = self._to_dataset(val_df)
         collator = DataCollatorWithPadding(tokenizer=self.tokenizer)
 
-        use_sample_weight = "sample_weight" in train_df.columns
         args = TrainingArguments(
             output_dir=out_dir,
             per_device_train_batch_size=int(cfg["batch_size"]),
@@ -80,9 +77,8 @@ class HFClassifier:
             do_train=True,
             do_eval=True,
             weight_decay=float(cfg.get("training_regularization", {}).get("weight_decay", 0.0)),
-            remove_unused_columns=not use_sample_weight,
         )
-        trainer_cls = WeightedTrainer if use_sample_weight else Trainer
+        trainer_cls = WeightedTrainer if "sample_weight" in train_df.columns else Trainer
         trainer = trainer_cls(
             model=self.model,
             args=args,

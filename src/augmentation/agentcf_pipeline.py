@@ -80,7 +80,8 @@ async def build_agentcf_aug(df: pd.DataFrame, config: dict[str, Any]) -> tuple[p
     verifier = VerifierAgent(config)
     selector = SelectorAgent(config)
     max_retry_rounds = int(config["augmentation"]["max_retry_rounds"])
-    checkpoint_every = int(config["runtime"]["checkpoint_every_n_samples"])
+    checkpoint_every = int(config.get("runtime", {}).get("checkpoint_every_n_samples", 50))
+    checkpoint_every = max(1, checkpoint_every)
     output_root = Path(config.get("output_root", "outputs"))
     checkpoints_dir = output_root / "checkpoints"
     candidates_dir = output_root / "generated_candidates"
@@ -94,10 +95,17 @@ async def build_agentcf_aug(df: pd.DataFrame, config: dict[str, Any]) -> tuple[p
     total_verifications = 0
 
     sample_records = df.to_dict(orient="records")
-    for idx, sample in enumerate(sample_records, start=1):
-        selected, plans, cands, vers = await _process_one(
-            sample, planner, generator, verifier, selector, max_retry_rounds
-        )
+    concurrency = int(config.get("runtime", {}).get("concurrency", 10))
+    sem = asyncio.Semaphore(concurrency)
+    processed_count = 0
+
+    async def _process_with_sem(sample: dict) -> tuple[list, list, list, list]:
+        async with sem:
+            return await _process_one(sample, planner, generator, verifier, selector, max_retry_rounds)
+
+    tasks = [_process_with_sem(s) for s in sample_records]
+    for idx, coro in enumerate(asyncio.as_completed(tasks), start=1):
+        selected, plans, cands, vers = await coro
         selected_rows.extend(selected)
         selected_buffer.extend(selected)
         plans_buffer.extend(plans)
@@ -105,8 +113,9 @@ async def build_agentcf_aug(df: pd.DataFrame, config: dict[str, Any]) -> tuple[p
         verifications_buffer.extend(vers)
         total_candidates += len(cands)
         total_verifications += len(vers)
+        processed_count += 1
 
-        if idx % checkpoint_every == 0 or idx == len(sample_records):
+        if processed_count % checkpoint_every == 0 or processed_count == len(sample_records):
             append_jsonl(checkpoints_dir / "plans.jsonl", plans_buffer)
             append_jsonl(candidates_dir / "candidates.jsonl", candidates_buffer)
             append_jsonl(checkpoints_dir / "verifications.jsonl", verifications_buffer)
@@ -115,7 +124,7 @@ async def build_agentcf_aug(df: pd.DataFrame, config: dict[str, Any]) -> tuple[p
             candidates_buffer.clear()
             verifications_buffer.clear()
             selected_buffer.clear()
-            print(f"[AgentCF] checkpoint: {idx}/{len(sample_records)} samples processed", flush=True)
+            print(f"[AgentCF] checkpoint: {processed_count}/{len(sample_records)} samples processed", flush=True)
 
     aug_df = pd.DataFrame(selected_rows, columns=["id", "text", "label", "source", "candidate_id", "final_score"])
     stats = {

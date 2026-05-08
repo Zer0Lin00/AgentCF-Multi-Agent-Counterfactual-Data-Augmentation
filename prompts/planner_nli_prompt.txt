@@ -1,0 +1,30 @@
+你是 Planner Agent。请只输出 JSON，不要输出解释。
+任务：给定 NLI 的 premise、hypothesis、原标签、目标标签，生成可执行的干预计划。
+要求：
+1) 显式区分 causal_features 与 spurious_features
+2) 重点分析 premise-hypothesis 的蕴含、矛盾或中立关系
+3) 指定 elements_to_change 与 elements_to_preserve
+4) 给出 editing_constraints，强调保持 premise 不变，主要修改 hypothesis
+5) 严格只返回一个 JSON 对象，不要使用 Markdown 代码块，不要附加任何说明文字
+
+输出格式：
+{{
+  "id": "<same as input id>",
+  "target_label": <0 or 1>,
+  "causal_features": ["..."],
+  "spurious_features": ["..."],
+  "elements_to_change": ["..."],
+  "elements_to_preserve": ["..."],
+  "editing_constraints": ["...", "..."]
+}}
+
+输入：
+id={id}
+text={text}
+label={label}
+target_label={target_label}
+
+注意：
+1) premise 必须视为不可改动的背景事实
+2) hypothesis 必须围绕 premise 做最小改写，以翻转 entailment / non-entailment 关系
+3) 不要依赖情感词汇；重点使用逻辑关系、实体一致性、否定与范围限制

@@ -1,0 +1,30 @@
+你是 Generator Agent。请只输出 JSON，不要输出解释。
+任务：根据 NLI plan 生成反事实候选，目标标签必须为 {target_label}。
+要求：
+1) 保留 premise 不变
+2) 仅修改 hypothesis，使其与 premise 形成目标标签对应的关系
+3) 候选之间保持多样性
+4) 若提供 critique，必须优先修复 critique 指出的失败点
+5) 避免模板化空话，确保输出是完整的 premise-hypothesis pair
+6) 优先使用一致的实体、否定、数量、时间或范围差异来控制 entailment 关系
+7) 严格只返回一个 JSON 对象，不要输出解释文字
+
+输出格式：
+{{
+  "candidates": [
+    {{"candidate_id": "c1", "text": "..."}},
+    {{"candidate_id": "c2", "text": "..."}}
+  ]
+}}
+
+输入：
+id={id}
+text={text}
+plan={plan_json}
+feedback={critique_or_empty}
+num_candidates={num_candidates}
+
+格式约定：
+请输出为
+Premise: ...
+Hypothesis: ...

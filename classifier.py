@@ -11,6 +11,7 @@ from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
     DataCollatorWithPadding,
+    EarlyStoppingCallback,
     Trainer,
     TrainingArguments,
 )
@@ -37,10 +38,8 @@ class HFClassifier:
     max_length: int
 
     def __post_init__(self) -> None:
-        import os
-        os.environ.setdefault("HF_HUB_OFFLINE", "1")  # 强制模型离线模式
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, local_files_only=True)
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name, num_labels=2, local_files_only=True)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name, num_labels=2)
 
     def _to_dataset(self, df):
         cols = ["text", "label"] + (["sample_weight"] if "sample_weight" in df.columns else [])
@@ -66,6 +65,17 @@ class HFClassifier:
         collator = DataCollatorWithPadding(tokenizer=self.tokenizer)
 
         use_sample_weight = "sample_weight" in train_df.columns
+        regularization = cfg.get("training_regularization", {})
+        dropout_rate = float(regularization.get("dropout_rate", self.model.config.hidden_dropout_prob))
+        self.model.config.hidden_dropout_prob = dropout_rate
+        if hasattr(self.model, "classifier") and hasattr(self.model.classifier, "dropout"):
+            try:
+                self.model.classifier.dropout.p = dropout_rate
+            except Exception:
+                pass
+
+        early_stopping_patience = int(regularization.get("early_stopping_patience", 0))
+        use_early_stopping = early_stopping_patience > 0
         args = TrainingArguments(
             output_dir=out_dir,
             per_device_train_batch_size=int(cfg["batch_size"]),
@@ -73,15 +83,19 @@ class HFClassifier:
             num_train_epochs=float(cfg["epochs"]),
             learning_rate=float(cfg["learning_rate"]),
             eval_strategy="epoch",
-            save_strategy="no",
+            save_strategy="epoch" if use_early_stopping else "no",
             logging_steps=20,
             report_to="none",
             seed=int(cfg["seed"]),
             do_train=True,
             do_eval=True,
-            weight_decay=float(cfg.get("training_regularization", {}).get("weight_decay", 0.0)),
+            weight_decay=float(regularization.get("weight_decay", 0.0)),
             remove_unused_columns=not use_sample_weight,
+            load_best_model_at_end=use_early_stopping,
+            metric_for_best_model="eval_accuracy" if use_early_stopping else None,
+            greater_is_better=True if use_early_stopping else None,
         )
+        callbacks = [EarlyStoppingCallback(early_stopping_patience=early_stopping_patience)] if use_early_stopping else []
         trainer_cls = WeightedTrainer if use_sample_weight else Trainer
         trainer = trainer_cls(
             model=self.model,
@@ -91,6 +105,7 @@ class HFClassifier:
             processing_class=self.tokenizer,
             data_collator=collator,
             compute_metrics=self._compute_metrics,
+            callbacks=callbacks,
         )
         trainer.train()
         metrics = trainer.evaluate()

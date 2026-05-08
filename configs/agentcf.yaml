@@ -1,14 +1,29 @@
-﻿extends: default.yaml
+extends: default.yaml
 augmentation:
   method: agentcf
   num_candidates: 5
-  keep_top_k: 2
+  keep_top_k: 1
   max_retry_rounds: 3
+  ratio: 0.5
 thresholds:
-  label_score: 0.75
-  final_score: 0.68
-  percentile_keep: 0.50
+  label_score: 0.80
+  final_score: 0.75
+  percentile_keep: 0.30
+weights:
+  label_score: 0.25
+  semantic_score: 0.25
+  minimality_score: 0.15
+  consistency_score: 0.10
+  difficulty_score: 0.00
+  domain_invariant_score: 0.15
+  style_robustness_score: 0.10
 verification:
   label_model_name: distilbert-base-uncased-finetuned-sst-2-english
+  sst2_label_model_name: distilbert-base-uncased-finetuned-sst-2-english
+  general_sentiment_model_name: cardiffnlp/twitter-roberta-base-sentiment-latest
+  use_wasserstein: true
+  ood_mode: true
+ood_mode: true
+output_root: outputs/ood_agentcf_v5_strict
 runtime:
   release_vllm_after_generation: true

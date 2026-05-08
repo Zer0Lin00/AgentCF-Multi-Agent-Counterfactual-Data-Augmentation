@@ -8,7 +8,7 @@ from typing import Any
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from src.metrics.minimality import minimality_score
+from src.metrics.minimality import edit_similarity
 from src.metrics.quality_score import final_quality_score
 from src.metrics.similarity import semantic_similarity
 
@@ -43,9 +43,8 @@ def _tokenize(text: str) -> list[str]:
 @lru_cache(maxsize=4)
 def _load_label_model(model_name: str) -> tuple[AutoTokenizer, AutoModelForSequenceClassification]:
     os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
-    os.environ.setdefault("HF_HUB_OFFLINE", "1")  # 强制离线模式
-    tokenizer = AutoTokenizer.from_pretrained(model_name, local_files_only=True)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, local_files_only=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name)
     model.eval()
     model.to("cpu")
     return tokenizer, model
@@ -55,7 +54,7 @@ class VerifierAgent:
     def __init__(self, config: dict[str, Any]) -> None:
         self.config = config
         self.thresholds = config["thresholds"]
-        self.task_type = str(config.get("task_type", config.get("data", {}).get("task_type", "sentiment"))).lower()
+        self.weights = config["weights"]
         self.label_model_name = str(
             config.get("verification", {}).get(
                 "sst2_label_model_name",
@@ -65,7 +64,6 @@ class VerifierAgent:
         self.general_model_name = str(
             config.get("verification", {}).get("general_sentiment_model_name", self.label_model_name)
         )
-        self.use_wasserstein = bool(config.get("verification", {}).get("use_wasserstein", False))
         self.ood_mode = bool(config.get("ood_mode", False) or config.get("verification", {}).get("ood_mode", False))
 
     def verify(
@@ -78,36 +76,34 @@ class VerifierAgent:
         original = sample["text"]
         cand_text = candidate["text"]
 
-        if self.task_type == "nli":
-            label_score = self._nli_label_score(original, cand_text, target_label)
-            general_score = label_score
-        else:
-            label_score = self._label_score(cand_text, target_label, self.label_model_name)
-            general_score = (
-                self._label_score(cand_text, target_label, self.general_model_name) if self.ood_mode else label_score
-            )
+        label_score = self._label_score(cand_text, target_label, self.label_model_name)
+        general_score = (
+            self._label_score(cand_text, target_label, self.general_model_name) if self.ood_mode else label_score
+        )
         domain_invariant = min(label_score, general_score)
         sem_score = semantic_similarity(original, cand_text)
-        min_score = minimality_score(original, cand_text, use_wasserstein=self.use_wasserstein)
+        min_score = edit_similarity(original, cand_text)
         consistency = self._consistency_score(original, cand_text, plan)
         style_robustness = self._style_robustness_score(original, cand_text)
-        score = self._soft_quality_score(
-            label_score=label_score,
-            general_score=general_score,
-            domain_invariant=domain_invariant,
-            sem_score=sem_score,
-            min_score=min_score,
-            consistency=consistency,
-            style_robustness=style_robustness,
+        score = final_quality_score(
+            {
+                "label_score": label_score,
+                "general_sentiment_score": general_score,
+                "domain_invariant_score": domain_invariant,
+                "semantic_score": sem_score,
+                "minimality_score": min_score,
+                "consistency_score": consistency,
+                "style_robustness_score": style_robustness,
+            },
+            self.weights,
         )
 
         hard_ok = (
             label_score >= self.thresholds["label_score"]
-            and general_score >= self.thresholds.get("general_sentiment_score", 0.70)
-            and domain_invariant >= self.thresholds.get("domain_invariant_score", self.thresholds["label_score"])
+            and general_score >= self.thresholds.get("general_sentiment_score", self.thresholds["label_score"])
+            and domain_invariant >= self.thresholds.get("domain_invariant_score", 0.0)
             and sem_score >= self.thresholds["semantic_score"]
-            and consistency >= self.thresholds.get("consistency_score", 0.50)
-            and style_robustness >= self.thresholds.get("style_robustness_score", 0.45)
+            and min_score >= self.thresholds["minimality_score"]
             and score >= self.thresholds["final_score"]
         )
         return {
@@ -125,68 +121,6 @@ class VerifierAgent:
             "status": "pass" if hard_ok else "reject",
             "critique": "" if hard_ok else self._critique(label_score, general_score, sem_score, min_score),
         }
-
-    @staticmethod
-    def _split_nli_pair(text: str) -> tuple[str, str]:
-        if "Premise:" in text and "Hypothesis:" in text:
-            premise_part, hypothesis_part = text.split("Hypothesis:", 1)
-            premise = premise_part.split("Premise:", 1)[-1].strip()
-            hypothesis = hypothesis_part.strip()
-            return premise, hypothesis
-        return text, text
-
-    @staticmethod
-    def _nli_label_score(original: str, candidate: str, target_label: int) -> float:
-        premise, hypothesis = VerifierAgent._split_nli_pair(candidate)
-        premise_tokens = set(_tokenize(premise))
-        hypothesis_tokens = set(_tokenize(hypothesis))
-        if not hypothesis_tokens:
-            return 0.0
-        overlap = len(premise_tokens & hypothesis_tokens) / max(len(hypothesis_tokens), 1)
-        premise_coverage = len(premise_tokens & hypothesis_tokens) / max(len(premise_tokens), 1)
-        negation_tokens = {"not", "no", "never", "none", "nobody", "nothing", "neither", "n't"}
-        contradiction_cues = {"contradiction", "false", "wrong", "cannot", "impossible", "refute", "deny"}
-        has_negation = bool(hypothesis_tokens & negation_tokens)
-        has_contradiction = bool(hypothesis_tokens & contradiction_cues)
-        if target_label == 1:
-            score = 0.15 + 0.55 * overlap + 0.20 * premise_coverage - (0.10 if has_negation or has_contradiction else 0.0)
-        else:
-            score = 0.20 + 0.45 * (1.0 - overlap) + 0.20 * (1.0 - premise_coverage)
-            if has_negation or has_contradiction:
-                score += 0.15
-        return max(0.0, min(1.0, score))
-
-    def _soft_quality_score(
-        self,
-        *,
-        label_score: float,
-        general_score: float,
-        domain_invariant: float,
-        sem_score: float,
-        min_score: float,
-        consistency: float,
-        style_robustness: float,
-    ) -> float:
-        return final_quality_score(
-            {
-                "label_score": label_score,
-                "general_sentiment_score": general_score,
-                "domain_invariant_score": domain_invariant,
-                "semantic_score": sem_score,
-                "minimality_score": min_score,
-                "consistency_score": consistency,
-                "style_robustness_score": style_robustness,
-            },
-            {
-                "label_score": 0.25,
-                "general_sentiment_score": 0.10,
-                "domain_invariant_score": 0.18,
-                "semantic_score": 0.18,
-                "consistency_score": 0.14,
-                "style_robustness_score": 0.10,
-                "minimality_score": 0.05,
-            },
-        )
 
     def _label_score(self, text: str, target_label: int, model_name: str) -> float:
         tokenizer, model = _load_label_model(model_name)
@@ -231,19 +165,22 @@ class VerifierAgent:
         c_tokens = set(_tokenize(candidate))
         changed = o_tokens.symmetric_difference(c_tokens)
         sentiment_changed = len(changed & (POS_WORDS | NEG_WORDS))
-        lexical_shortcut_penalty = 0.25 if sentiment_changed <= 2 and len(changed) <= 4 else 0.0
+        lexical_shortcut_penalty = 0.30 if sentiment_changed <= 2 and len(changed) <= 4 else 0.0
+        short_penalty = 0.20 if len(candidate.split()) < 8 else 0.0
+        template_penalty = 0.15 if len(changed) == 1 and sentiment_changed == 1 else 0.0
         length_ratio = min(len(candidate.split()), len(original.split())) / max(len(candidate.split()), len(original.split()), 1)
-        review_markers = {"because", "although", "while", "but", "however", "overall", "yet", "still"}
-        context_bonus = 0.12 if c_tokens & review_markers else 0.0
-        return max(0.0, min(1.0, 0.78 * length_ratio + context_bonus - lexical_shortcut_penalty))
+        review_markers = {"because", "although", "while", "but", "however", "overall", "yet", "still", "despite", "though"}
+        context_bonus = 0.14 if c_tokens & review_markers else 0.0
+        score = 0.70 * length_ratio + context_bonus - lexical_shortcut_penalty - short_penalty - template_penalty
+        return max(0.0, min(1.0, score))
 
     @staticmethod
     def _critique(label_score: float, general_score: float, semantic_score: float, min_score: float) -> str:
         issues = []
         if label_score < 0.75:
-            issues.append("label relation is insufficient")
+            issues.append("SST-2 sentiment flip is insufficient")
         if general_score < 0.70:
-            issues.append("domain-general relation is insufficient")
+            issues.append("domain-general sentiment is insufficient")
         if semantic_score < 0.8:
             issues.append("semantic drift is too large")
         if min_score < 0.7:

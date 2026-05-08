@@ -40,8 +40,8 @@ def _merge_train(original: pd.DataFrame, aug: pd.DataFrame, ratio: float) -> pd.
     return pd.concat([base, picked], ignore_index=True)
 
 
-def _release_local_vllm(cfg: dict, already_released: bool) -> bool:
-    if already_released:
+def _release_local_vllm(cfg: dict, method: str, already_released: bool) -> bool:
+    if already_released or method not in LLM_METHODS:
         return already_released
     runtime_cfg = cfg.get("runtime", {})
     if not runtime_cfg.get("release_vllm_after_generation", False):
@@ -93,7 +93,7 @@ async def run_ood(config_path: str) -> None:
     ood_rows: list[dict] = []
     vllm_released = False
 
-    for idx, method in enumerate(methods):
+    for method in methods:
         clf = HFClassifier(model_name=cfg["model_name"], max_length=int(cfg["max_length"]))
         if method == "No Augmentation":
             aug_df = pd.DataFrame(columns=["id", "text", "label", "source"])
@@ -122,9 +122,7 @@ async def run_ood(config_path: str) -> None:
                 ver_df = pd.read_json(ver_path, lines=True)
             aug_df.attrs["agentcf_weight"] = agentcf_weight
 
-        has_future_llm_method = any(m in LLM_METHODS for m in methods[idx + 1 :])
-        if method in LLM_METHODS and not has_future_llm_method:
-            vllm_released = _release_local_vllm(cfg, vllm_released)
+        vllm_released = _release_local_vllm(cfg, method, vllm_released)
         merged_train = _merge_train(train_df, aug_df, ratio=ratio)
         run_dir = output_root / "checkpoints" / method.lower().replace(" ", "_").replace("+", "plus").replace("-", "_")
         val_metrics = clf.train_and_eval(merged_train, val_df, cfg, out_dir=str(run_dir))

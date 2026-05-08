@@ -22,3 +22,8 @@ id={id}
 text={text}
 label={label}
 target_label={target_label}
+
+注意（跨域鲁棒性约束）：
+1) causal_features 必须是跨领域通用的情感因果特征（如事件结果、人物态度、情节走向），严禁使用 SST-2 特有的短句情感词汇（如 "good"/"bad"/"great"/"terrible"）
+2) spurious_features 应明确标注为 SST-2 短句风格的表层词汇，这些词在长影评（如 IMDb）中不可靠
+3) 生成的反事实必须在 SST-2 短句和 IMDb 长影评两种风格下都能成立，避免依赖单一领域的表层特征
